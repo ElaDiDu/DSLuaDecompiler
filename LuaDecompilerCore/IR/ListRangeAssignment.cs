@@ -76,7 +76,7 @@ public class ListRangeAssignment : Instruction
         var replaced = false;
         for (var i = 0; i < Values.Count; i++)
         {
-            if (Expression.ShouldReplace(orig, Values[i], sub))
+            if (Expression.ShouldReplace(orig, Values[i]))
             {
                 replaced = true;
                 Values[i] = sub;

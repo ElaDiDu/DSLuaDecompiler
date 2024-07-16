@@ -33,6 +33,18 @@ namespace LuaDecompilerCore.CFG
         public HashSet<Identifier> UpwardExposed;
         public HashSet<Identifier> LiveOut;
 
+        public Dictionary<Identifier, string> IdentifierNames = new();
+
+        /// <summary>
+        /// All identifiers defined as locals in this block
+        /// </summary>
+        public HashSet<Identifier> LocalsDefined = new();
+
+        /// <summary>
+        /// All blocks which dominate this in parent function. For printing local names, filled out on a late pass
+        /// </summary>
+        public List<uint> DominantBlocks = new();
+
         /// <summary>
         /// Register IDs of registers killed (i.e. redefined) under the scope of this block (excluding this block)
         /// </summary>
@@ -370,6 +382,65 @@ namespace LuaDecompilerCore.CFG
                 warnings.Add($"-- Warning: Function {debugFuncId} using already code-generated block {Name}");
             }
             _isCodeGenerated = true;
+        }
+
+        public string? GetLocalName(Identifier identifier, Function? func) 
+        {
+            // Defined in this block
+            if (IdentifierNames.ContainsKey(identifier))
+                return IdentifierNames[identifier];
+
+            // Search dominant blocks
+            if (func != null) 
+            {
+                foreach (var blockIndex in DominantBlocks) 
+                {
+                    var name = func.BlockList[(int)blockIndex].IdentifierNames.TryGetValue(identifier, out var n) ? n : null;
+                    if (name  != null) 
+                        return name;
+                }
+            }
+
+            return null;
+        }
+
+        public void SetLocalName(Identifier identifier, Function func, string name)
+        {
+            if (LocalsDefined.Contains(identifier))
+            {
+                IdentifierNames[identifier] = name;
+                return;
+            }
+
+            foreach (var blockIndex in DominantBlocks)
+            {
+                var block = func.BlockList[(int)blockIndex];
+                if (block.LocalsDefined.Contains(identifier))
+                {
+                    block.IdentifierNames[identifier] = name;
+                    return;
+                }
+            }
+        }
+
+        public bool IsLocalRenamed(Identifier identifier, Function func) => GetLocalName(identifier, func) != null;
+
+        public bool HasIdentifierNameInScope(string name, Function? func) 
+        {
+            if (IdentifierNames.ContainsValue(name))
+                return true;
+
+            // Search dominant blocks
+            if (func != null)
+            {
+                foreach (var blockIndex in DominantBlocks)
+                {
+                    if (func.BlockList[(int)blockIndex].IdentifierNames.ContainsValue(name))
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         public bool IsCodeGenerated => _isCodeGenerated;

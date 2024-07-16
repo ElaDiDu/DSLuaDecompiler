@@ -117,7 +117,7 @@ public class Lua50Decompiler : ILanguageDecompiler
     {
         if (val < 250)
         {
-            return new IdentifierReference(irFunction.GetRegister(val)) { MinConstantReplacement = 261 };
+            return new IdentifierReference(irFunction.GetRegister(val));
         }
 
         return ToConstantIr(fun.Constants[val - 250], (int)val - 250);
@@ -824,8 +824,11 @@ public class Lua50Decompiler : ILanguageDecompiler
         passManager.AddPass("detect-local-variables", new DetectLocalVariablesPass());
         // irfun.ArgumentNames = fun.LocalsAt(0);
         passManager.AddPass("rename-local-variables", new RenameVariablesPass());
+        passManager.AddPass("setup-local-naming-structure", new SetupLocalNamingStructurePass());
+        passManager.AddPass("rename-identifiers-by-context", new RenameVariablesWithContextPass());
         passManager.AddPass("solve-expressions", new SolveExpressionsPass());
         passManager.AddPass("parenthesize", new ParenthesizePass());
+
 
         passManager.AddPass("build-ast", new AstTransformPass());
     }

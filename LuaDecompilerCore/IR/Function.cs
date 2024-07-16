@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Xml.XPath;
 using LuaDecompilerCore.CFG;
 using LuaDecompilerCore.Utilities;
 
@@ -81,6 +82,10 @@ namespace LuaDecompilerCore.IR
 
         public readonly Dictionary<Identifier, string> IdentifierNames = new();
         
+        public readonly Dictionary<Identifier, Queue<string>> LocalNamesRegisterOrdered = new();
+
+        public readonly Dictionary<string, int> VariableNameCounter = new();
+
         public readonly List<string> Warnings = new();
 
         private int _currentBlockId;
@@ -393,7 +398,79 @@ namespace LuaDecompilerCore.IR
 
             return ordering;
         }
+
+        public string? GetIdentifierName(Identifier identifier, BasicBlock? block, bool allowGenericRenames = true) 
+        {
+            if (!identifier.IsRegister)
+                return null;
+
+            // Is parameter
+            if (identifier.RegNum < ParameterCount)
+                return IdentifierNames.TryGetValue(identifier, out var n) ? n : null;
+
+            // Attempt local fetch
+            else if (block != null)
+            {
+                var result = block.GetLocalName(identifier, this);
+                if (result == null && allowGenericRenames)
+                    result = IdentifierNames.TryGetValue(identifier, out var n) ? n : null;
+
+                return result;
+            }
+
+            return null;
+        }
+
+        public void SetIdentifierName(Identifier identifier, BasicBlock? block, string name) 
+        {
+            if (!identifier.IsRegister)
+                return;
+
+            // Is parameter
+            if (identifier.RegNum < ParameterCount)
+                IdentifierNames[identifier] = name;
+            else if (block != null)
+                block.SetLocalName(identifier, this, name);
+        }
+        public bool IsVariableContextRenamed(Identifier identifier, BasicBlock? block) => GetIdentifierName(identifier, block, false) != null;
+
+        // Returns whether the given variable name already exists in the block's scope
+        public bool HasIdentifierNameInScope(BasicBlock? block, string name) 
+        {
+            if (IdentifierNames.ContainsValue(name))
+                return true;
+            if (block != null)
+                return block.HasIdentifierNameInScope(name, this);
+
+            return false;
+        }
+
+        public void AddIdentifierName(Identifier identifier, string name) 
+        {
+            if (VariableNameCounter.ContainsKey(name))
+            {
+                VariableNameCounter[name]++;
+            }
+            else
+                VariableNameCounter[name] = 1;
+
+            if (LocalNamesRegisterOrdered.ContainsKey(identifier))
+                LocalNamesRegisterOrdered[identifier].Enqueue(name + VariableNameCounter[name]);
+            else
+                LocalNamesRegisterOrdered[identifier] = new Queue<string>(["BUG_IF_VISIBLE", name + VariableNameCounter[name]]);
+
+            //IdentifierNames[identifier] = name;
+        }
+
+        public string? DequeueIdentifierName(Identifier identifier) 
+        {
+            if (LocalNamesRegisterOrdered.ContainsKey(identifier))
+                return LocalNamesRegisterOrdered[identifier].TryDequeue(out var name) ? name : null;
+
+            return null;
+        }
         
+
         public override string ToString()
         {
             return FunctionPrinter.DebugPrintFunction(this);

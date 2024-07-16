@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 using LuaDecompilerCore.IR;
 
@@ -8,12 +7,12 @@ namespace LuaDecompilerCore.Passes;
 /// <summary>
 /// Rename variables from their temporary register based names to something more generic
 /// </summary>
-public class RenameVariablesPass : IPass
+public class RenameVariablesPassAI : IPass
 {
     public bool RunOnFunction(DecompilationContext decompilationContext, FunctionContext functionContext, Function f)
     {
         var renamed = new HashSet<Identifier>();
-        
+
         // Rename function arguments
         for (var i = 0; i < f.ParameterCount; i++)
         {
@@ -28,7 +27,7 @@ public class RenameVariablesPass : IPass
                 f.IdentifierNames[identifier] = $"f{f.FunctionId}_arg{i}";
             }
         }
-        
+
         // Rename all the locals
         var localCounter = 0;
         foreach (var b in f.BlockList)

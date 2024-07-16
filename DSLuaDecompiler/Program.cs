@@ -4,6 +4,7 @@ using System.CommandLine.Parsing;
 using System.Globalization;
 using System.Text;
 using LuaDecompilerCore;
+using LuaDecompilerCore.Annotations;
 using LuaDecompilerCore.IR;
 using LuaDecompilerCore.LanguageDecompilers;
 using LuaDecompilerCore.Utilities;

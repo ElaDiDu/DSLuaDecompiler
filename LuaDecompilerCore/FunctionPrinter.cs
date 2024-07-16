@@ -11,6 +11,7 @@ public partial class FunctionPrinter
 {
     private StringBuilder _builder = new();
     private readonly List<Function> _functionStack = new();
+    private readonly List<BasicBlock> _blockStack = new();
     private int _indentLevel;
     private bool _insertDebugComments;
     private bool _debugPrint;
@@ -21,35 +22,35 @@ public partial class FunctionPrinter
         printer.VisitFunction(function);
         return printer._builder.ToString();
     }
-    
+
     internal static string DebugPrintBasicBlock(BasicBlock basicBlock)
     {
         var printer = new FunctionPrinter { _debugPrint = true };
         printer.VisitBasicBlock(basicBlock);
         return printer._builder.ToString();
     }
-    
+
     internal static string DebugPrintInstruction(Instruction instruction)
     {
         var printer = new FunctionPrinter { _debugPrint = true };
         printer.VisitInstruction(instruction);
         return printer._builder.ToString();
     }
-    
+
     internal static string DebugPrintExpression(Expression expression)
     {
         var printer = new FunctionPrinter { _debugPrint = true };
         printer.VisitExpression(expression);
         return printer._builder.ToString();
     }
-    
+
     internal static string DebugPrintIdentifier(Identifier identifier)
     {
         var printer = new FunctionPrinter { _debugPrint = true };
         printer.VisitIdentifier(identifier);
         return printer._builder.ToString();
     }
-    
+
     public string PrintFunction(Function function)
     {
         _builder = new StringBuilder(128 * 1024);
@@ -74,12 +75,12 @@ public partial class FunctionPrinter
     {
         _builder.Append(value);
     }
-    
+
     private void Append(double value)
     {
         _builder.Append(value);
     }
-    
+
     private void NewLine()
     {
         Append('\n');
@@ -105,20 +106,40 @@ public partial class FunctionPrinter
         _functionStack.RemoveAt(_functionStack.Count - 1);
     }
 
+    private void PushBlock(BasicBlock block)
+    {
+        _blockStack.Add(block);
+    }
+
+    private void PopBlock()
+    {
+        _blockStack.RemoveAt(_blockStack.Count - 1);
+    }
+
     private Function? CurrentFunction()
     {
         return _functionStack.Count > 0 ? _functionStack[^1] : null;
     }
-    
+
     private Function? LastFunction()
     {
         return _functionStack.Count > 1 ? _functionStack[^2] : null;
     }
 
+    private BasicBlock? CurrentBlock() 
+    {
+        return _blockStack.Count > 0 ? _blockStack[^1] : null;
+    }
+
+    private BasicBlock? LastBlock()
+    {
+        return _blockStack.Count > 1 ? _blockStack[^2] : null;
+    }
+
     private void Indent(bool half = false)
     {
         for (var i = 0; i < _indentLevel; i++)
-        { 
+        {
             if (half && i == _indentLevel - 1)
             {
                 Append("  ");
@@ -261,7 +282,7 @@ public partial class FunctionPrinter
             NewLine();
             _indentLevel += 1;
         }
-        
+
         // Print warnings
         foreach (var warning in function.Warnings)
         {
@@ -269,14 +290,14 @@ public partial class FunctionPrinter
             Append(warning);
             NewLine();
         }
-        
+
         if (_insertDebugComments)
         {
             Indent();
             Append($"-- Function ID = {function.FunctionId}");
             NewLine();
         }
-        
+
         if (function.IsAst)
         {
             if (function.Warnings.Count == 0)
@@ -293,6 +314,8 @@ public partial class FunctionPrinter
                 {
                     continue;
                 }
+                PushBlock(b);
+
                 Indent(true);
                 Append(b.ToStringWithLoop());
                 NewLine();
@@ -310,7 +333,7 @@ public partial class FunctionPrinter
                 }
 
                 // Insert an implicit goto for fallthrough blocks if the destination isn't actually the next block
-                if (b.HasInstructions && 
+                if (b.HasInstructions &&
                     ((b.Last is ConditionalJump && b.EdgeTrue.BlockId != b.BlockId + 1) ||
                      (b.Last is not IJump and not Return && b.EdgeTrue.BlockId != b.BlockId + 1)))
                 {
@@ -324,6 +347,8 @@ public partial class FunctionPrinter
                     Append(')');
                     NewLine();
                 }
+
+                PopBlock();
             }
         }
         if (function.FunctionId != 0)
@@ -341,9 +366,11 @@ public partial class FunctionPrinter
 
     private void VisitBasicBlock(BasicBlock basicBlock, bool printInfiniteLoop = false)
     {
+        PushBlock(basicBlock);
         if (_debugPrint)
         {
             Append(basicBlock.Name);
+            PopBlock();
             return;
         }
 
@@ -354,7 +381,7 @@ public partial class FunctionPrinter
             Append(basicBlock.Name);
             NewLine();
         }
-        
+
         var count = basicBlock.IsInfiniteLoop && !printInfiniteLoop ? 1 : basicBlock.Instructions.Count;
         var begin = basicBlock.IsInfiniteLoop && printInfiniteLoop ? 1 : 0;
         for (var j = begin; j < count; j++)
@@ -367,7 +394,7 @@ public partial class FunctionPrinter
                 NewLine();
             }
             Indent();
-            
+
             // Returns that don't appear at the end of the block need to be wrapped with a do..end scope to compile
             // correctly
             if (inst is Return r &&
@@ -392,11 +419,13 @@ public partial class FunctionPrinter
                 NewLine();
             }
         }
+
+        PopBlock();
     }
 
     private void VisitEmptyExpression()
     {
-        
+
     }
 
     private void VisitConstant(Constant constant)
@@ -440,15 +469,14 @@ public partial class FunctionPrinter
             return null;
         return identifier.Type switch
         {
-            Identifier.IdentifierType.Register or Identifier.IdentifierType.RenamedRegister =>
-                currentFunction.IdentifierNames.TryGetValue(identifier, out var name) ? name : null,
+            Identifier.IdentifierType.Register or Identifier.IdentifierType.RenamedRegister => currentFunction.GetIdentifierName(identifier, CurrentBlock()),
             Identifier.IdentifierType.Global => currentFunction.Constants[(int)identifier.ConstantId].ToString(),
-            Identifier.IdentifierType.UpValue when currentFunction.UpValueBindings.Count > 0 => 
+            Identifier.IdentifierType.UpValue when currentFunction.UpValueBindings.Count > 0 =>
                 LookupIdentifierName(currentFunction.UpValueBindings[(int)identifier.UpValueNum], LastFunction()),
             _ => null
         };
     }
-    
+
     private void VisitIdentifier(Identifier identifier)
     {
         if (identifier.IsVarArgs)
@@ -492,12 +520,12 @@ public partial class FunctionPrinter
     {
         VisitIdentifier(identifierReference.Identifier);
     }
-    
+
     private void VisitTableAccess(TableAccess tableAccess)
     {
         // Detect a Lua 5.3 global variable and don't display it as a table reference
         var isGlobal = tableAccess.Table is IdentifierReference { Identifier.IsGlobalTable: true };
-        if (!isGlobal) 
+        if (!isGlobal)
             VisitExpression(tableAccess.Table);
         if (isGlobal && tableAccess.TableIndex is Constant { ConstType: Constant.ConstantType.ConstString } g)
         {
@@ -567,11 +595,11 @@ public partial class FunctionPrinter
                     Append("] = ");
                 }
             }
-            
+
             VisitExpression(initializerList.Expressions[i]);
             if (i != initializerList.Expressions.Count - 1)
             {
-                Append( ", ");
+                Append(", ");
             }
         }
 
@@ -655,7 +683,7 @@ public partial class FunctionPrinter
         var beginArg = 0;
         if (functionCall.Function is TableAccess
             {
-                TableIndex: Constant { ConstType: Constant.ConstantType.ConstString } c, 
+                TableIndex: Constant { ConstType: Constant.ConstantType.ConstString } c,
                 Table: not IdentifierReference { Identifier.IsGlobalTable: true }
             } tableAccess)
         {
@@ -719,14 +747,18 @@ public partial class FunctionPrinter
         if (assignment.IsLocalDeclaration)
         {
             Append("local ");
+
+            var func = CurrentFunction();
+            if (func != null && assignment.LeftAny && assignment.Left is IdentifierReference idRef)
+                func.DequeueIdentifierName(idRef.Identifier);
         }
         if (assignment is { IsFunctionDeclaration: true, Left: IdentifierReference ir, Right: Closure c })
         {
             VisitFunction(c.Function, LookupIdentifierName(ir.Identifier, CurrentFunction()));
             return;
         }
-        
-        if (assignment.LeftList.Count > 0) 
+
+        if (assignment.LeftList.Count > 0)
         {
             for (var i = 0; i < assignment.LeftList.Count; i++)
             {
@@ -763,9 +795,9 @@ public partial class FunctionPrinter
             NewLine();
             Indent();
         }
-        
+
         Append("break");
-        
+
         if (addScope)
         {
             PopIndent();
@@ -803,7 +835,7 @@ public partial class FunctionPrinter
         PopIndent();
         Indent();
         Append("end");
-        
+
         if (genericFor.Follow is { HasInstructions: true })
         {
             NewLine();
@@ -827,7 +859,7 @@ public partial class FunctionPrinter
         if (ifStatement.False != null)
         {
             // Check for elseif
-            if (ifStatement.False.Instructions.Count == 1 && 
+            if (ifStatement.False.Instructions.Count == 1 &&
                 ifStatement.False.Instructions.First() is IfStatement { Follow: null } s)
             {
                 s.IsElseIf = true;
@@ -866,7 +898,7 @@ public partial class FunctionPrinter
         Append("goto ");
         Append(jump.Destination.Name);
     }
-    
+
     private void VisitConditionalJumpLabel(ConditionalJumpLabel jump)
     {
         Append("if ");
@@ -875,7 +907,7 @@ public partial class FunctionPrinter
         Append("goto ");
         VisitLabel(jump.Destination);
     }
-    
+
     private void VisitConditionalJump(ConditionalJump jump)
     {
         Append("if ");
@@ -889,7 +921,7 @@ public partial class FunctionPrinter
     {
         Append($"{label.LabelName}:");
     }
-    
+
     private void VisitListRangeAssignment(ListRangeAssignment listRangeAssignment)
     {
         VisitIdentifierReference(listRangeAssignment.Table);
@@ -924,11 +956,11 @@ public partial class FunctionPrinter
         PushIndent();
         VisitBasicBlock(numericFor.Body);
         PopIndent();
-        
+
         Indent();
         Append("end");
         if (numericFor.Follow is { HasInstructions: true })
-        { 
+        {
             NewLine();
             VisitBasicBlock(numericFor.Follow);
         }
@@ -948,7 +980,7 @@ public partial class FunctionPrinter
             {
                 Append("undefined");
             }
-            
+
             if (i != phiFunction.Right.Count - 1)
             {
                 Append(", ");
@@ -976,7 +1008,7 @@ public partial class FunctionPrinter
             NewLine();
             Indent();
         }
-        
+
         Append("return");
         for (var i = 0; i < @return.ReturnExpressions.Count; i++)
         {
@@ -1015,7 +1047,7 @@ public partial class FunctionPrinter
         PushIndent();
         VisitBasicBlock(@while.Body, @while.IsBlockInlined);
         PopIndent();
-        
+
         Indent();
         if (@while.IsPostTested)
         {
@@ -1027,7 +1059,7 @@ public partial class FunctionPrinter
             Append("end");
         }
         if (@while.Follow is { HasInstructions: true })
-        { 
+        {
             NewLine();
             VisitBasicBlock(@while.Follow);
         }
