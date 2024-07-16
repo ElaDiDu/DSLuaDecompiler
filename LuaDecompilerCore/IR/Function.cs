@@ -81,11 +81,9 @@ namespace LuaDecompilerCore.IR
         public readonly List<Identifier> UpValueBindings = new();
 
         public readonly Dictionary<Identifier, string> IdentifierNames = new();
+
+        public readonly Dictionary<Identifier, string> ParameterNames = new();
         
-        public readonly Dictionary<Identifier, Queue<string>> LocalNamesRegisterOrdered = new();
-
-        public readonly Dictionary<string, int> VariableNameCounter = new();
-
         public readonly List<string> Warnings = new();
 
         private int _currentBlockId;
@@ -405,8 +403,14 @@ namespace LuaDecompilerCore.IR
                 return null;
 
             // Is parameter
-            if (identifier.RegNum < ParameterCount)
-                return IdentifierNames.TryGetValue(identifier, out var n) ? n : null;
+            if (identifier.RegNum < ParameterCount) //TODO all param renames are generic, should change 
+            {
+                var result = ParameterNames.TryGetValue(identifier, out var n) ? n : null;
+                if (result == null && allowGenericRenames)
+                    result = IdentifierNames.TryGetValue(identifier, out var name) ? name : null;
+
+                return result;
+            }
 
             // Attempt local fetch
             else if (block != null)
@@ -428,7 +432,7 @@ namespace LuaDecompilerCore.IR
 
             // Is parameter
             if (identifier.RegNum < ParameterCount)
-                IdentifierNames[identifier] = name;
+                ParameterNames[identifier] = name;
             else if (block != null)
                 block.SetLocalName(identifier, this, name);
         }
@@ -437,39 +441,13 @@ namespace LuaDecompilerCore.IR
         // Returns whether the given variable name already exists in the block's scope
         public bool HasIdentifierNameInScope(BasicBlock? block, string name) 
         {
-            if (IdentifierNames.ContainsValue(name))
+            if (ParameterNames.ContainsValue(name))
                 return true;
             if (block != null)
                 return block.HasIdentifierNameInScope(name, this);
 
             return false;
         }
-
-        public void AddIdentifierName(Identifier identifier, string name) 
-        {
-            if (VariableNameCounter.ContainsKey(name))
-            {
-                VariableNameCounter[name]++;
-            }
-            else
-                VariableNameCounter[name] = 1;
-
-            if (LocalNamesRegisterOrdered.ContainsKey(identifier))
-                LocalNamesRegisterOrdered[identifier].Enqueue(name + VariableNameCounter[name]);
-            else
-                LocalNamesRegisterOrdered[identifier] = new Queue<string>(["BUG_IF_VISIBLE", name + VariableNameCounter[name]]);
-
-            //IdentifierNames[identifier] = name;
-        }
-
-        public string? DequeueIdentifierName(Identifier identifier) 
-        {
-            if (LocalNamesRegisterOrdered.ContainsKey(identifier))
-                return LocalNamesRegisterOrdered[identifier].TryDequeue(out var name) ? name : null;
-
-            return null;
-        }
-        
 
         public override string ToString()
         {

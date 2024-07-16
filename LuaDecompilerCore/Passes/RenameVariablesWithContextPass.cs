@@ -151,7 +151,7 @@ public class RenameVariablesWithContextPass : IPass
     {
         for (uint i = 0; i < names.Length && i < func.ParameterCount; i++) 
         {
-            func.IdentifierNames[Identifier.GetRegister(i)] = names[i];
+            func.ParameterNames[Identifier.GetRegister(i)] = names[i];
         }
     }
 

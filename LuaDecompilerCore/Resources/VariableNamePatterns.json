@@ -75,6 +75,18 @@
         "distTarget"
       ]
     },
+    "GetOriginDist":
+    {
+      "return":
+      [
+        "distance"
+      ],
+      "args":
+      [
+        "ai",
+        "distTarget"
+      ]
+    },
     "GetHpRate":
     {
       "return":
@@ -87,17 +99,41 @@
         "hpTarget"
       ]
     },
-    "AddSubGoal":
+    "IsInterupt":
     {
       "return":
       [
-        "subGoal"
+        "isInterrupt"
       ],
       "args":
       [
-        "goal",
-        "goalId",
-        "life"
+        "ai",
+        "interruptType"
+      ]
+    },
+    "HasSpecialEffectId":
+    {
+      "return":
+      [
+        "hasEffect"
+      ],
+      "args":
+      [
+        "ai",
+        "target",
+        "effectId"
+      ]
+    },
+    "GetMapHitRadius":
+    {
+      "return":
+      [
+        "hitRadius"
+      ],
+      "args":
+      [
+        "ai",
+        "target"
       ]
     },
     "GetRandam_Float":
@@ -124,6 +160,19 @@
         "ai",
         "min",
         "max"
+      ]
+    },
+    "AddSubGoal":
+    {
+      "return":
+      [
+        "subGoal"
+      ],
+      "args":
+      [
+        "goal",
+        "goalId",
+        "life"
       ]
     },
     "Common_Battle_Activate":

@@ -747,10 +747,6 @@ public partial class FunctionPrinter
         if (assignment.IsLocalDeclaration)
         {
             Append("local ");
-
-            var func = CurrentFunction();
-            if (func != null && assignment.LeftAny && assignment.Left is IdentifierReference idRef)
-                func.DequeueIdentifierName(idRef.Identifier);
         }
         if (assignment is { IsFunctionDeclaration: true, Left: IdentifierReference ir, Right: Closure c })
         {
