@@ -730,6 +730,7 @@
       "successAngle",
       "turnTime",
       "turnFaceAngle",
+      "isComboAttack",
       "isMoveCancel",
       "isGuardBreakAttack",
       "isTurn",
