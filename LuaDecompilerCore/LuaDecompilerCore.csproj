@@ -15,17 +15,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\VariableNamePatterns.json" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <Folder Include="Resources\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\VariableNamePatterns.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    <ApplicationDefinition Include="Resources\VariableNamePatterns.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ApplicationDefinition>
   </ItemGroup>
 
 </Project>
