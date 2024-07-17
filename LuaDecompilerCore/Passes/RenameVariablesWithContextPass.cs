@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using LuaDecompilerCore.Analyzers;
@@ -27,13 +28,13 @@ public class RenameVariablesWithContextPass : IPass
     {
         var passInfo = new FunctionRenameVariablesPassInfo(f);
 
-        foreach (var b in f.BlockList)
+        foreach (var block in f.BlockList)
         {
-            passInfo.Block = b;
+            passInfo.Block = block;
 
-            foreach (var i in b.Instructions)
+            foreach (var instruction in block.Instructions)
             {
-                if (i is Assignment assignment)
+                if (instruction is Assignment assignment)
                 {
                     var right = assignment.Right;
                     var left = assignment.LeftList.Count > 0 ? assignment.Left : null;
@@ -42,34 +43,7 @@ public class RenameVariablesWithContextPass : IPass
                     // local k = b:MemberFunc()
                     if (right is FunctionCall fCall)
                     {
-                        var callFuncName = GetCallFunctionName(passInfo, fCall);
-                        if (callFuncName == null)
-                            continue;
-
-                        var returns = _variableNames.getCallReturns(callFuncName);
-                        if (returns != null)
-                            SetLeftNames(passInfo, assignment, returns);
-
-                        var args = _variableNames.getCallArgs(callFuncName);
-                        if (args != null)
-                            SetCallArgNames(passInfo, fCall, args);
-
-                        // Special arg setting for adding goal functions
-                        if ((callFuncName == "AddSubGoal" || callFuncName == "AddTopGoal" || callFuncName == "AddFrontGoal")
-                            && fCall.Args.Count > 1 && fCall.Args[1] is IdentifierReference goalIdGlobal)
-                        {
-                            string? goalIdName = GetGlobalName(passInfo, goalIdGlobal);
-                            if (goalIdName != null)
-                            {
-                                var goalArgs = _variableNames.getGoalArgs(goalIdName);
-                                if (goalArgs != null) 
-                                {
-                                    string[] fullArgs = new string[3 + goalArgs.Length];
-                                    goalArgs.CopyTo(fullArgs, 3);
-                                    SetCallArgNames(passInfo, fCall, fullArgs);
-                                }
-                            }
-                        }
+                        RenameVariablesInFunctionCall(passInfo, fCall, assignment);
                     }
                     // Goal.Activate = function(...)...
                     // function TuskRider500000_Act45(...)...
@@ -90,27 +64,121 @@ public class RenameVariablesWithContextPass : IPass
                             SetFunctionArgNames(closure.Function, args);
                     }
                 }
+                else if (instruction is IfStatement ifStatement)
+                {
+                    Console.WriteLine(ifStatement);
+                    foreach (var expression in ifStatement.Condition.GetExpressions())
+                    {
+                        if (expression is FunctionCall fCall)
+                        {
+                            RenameVariablesInFunctionCall(passInfo, fCall);
+                        }
+                    }
+                }
+                else if (instruction is ConditionalJumpBase conditionalJump) 
+                {
+                    foreach (var expression in conditionalJump.Condition.GetExpressions())
+                    {
+                        if (expression is FunctionCall fCall)
+                        {
+                            RenameVariablesInFunctionCall(passInfo, fCall);
+                        }
+                    }
+                }
+                /*
+                else if (instruction is GenericFor genericFor) 
+                {
+                    if (genericFor.Iterator.Right is FunctionCall fCall) 
+                    {
+                        RenameVariablesInFunctionCall(passInfo, fCall, genericFor.Iterator);
+                    }
+                }
+                else if (instruction is NumericFor numericFor) 
+                {
+                    numericFor
+                }
+                */
             }
         }
 
         return false;
     }
 
-    // If `expression` is a call, returns the name of the method being called or empty string if it isn't.
-    private static string? GetCallFunctionName(FunctionRenameVariablesPassInfo info, Expression expression)
+    /// <summary>
+    /// Renames return and args according to the naming json
+    /// </summary>
+    /// <param name="passInfo"></param>
+    /// <param name="fCall"></param>
+    /// <param name="assignment"></param>
+    private void RenameVariablesInFunctionCall(FunctionRenameVariablesPassInfo passInfo, FunctionCall fCall, Assignment? assignment = null) 
     {
-        if (expression is FunctionCall fCall) 
+        var callFuncName = GetCallFunctionName(passInfo, fCall);
+        if (callFuncName == null)
+            return;
+
+        // Check if the call assigns variables
+        if (assignment != null && _variableNames.getCallReturns(callFuncName) is string[] returns)
         {
-            if (fCall.Function is TableAccess tableAccess && tableAccess.TableIndex is Constant funcName)
-                return funcName.String;
-            if (fCall.Function is IdentifierReference idRef)
-                return GetGlobalName(info, idRef);
+            // Changing return name by arg input context
+            if (_variableNames.getArgsToAppendToReturn(callFuncName) is int[] argsToAppend)
+            {
+                StringBuilder append = new StringBuilder();
+
+                foreach (int argToAppend in argsToAppend)
+                {
+                    var arg = fCall.Args[argToAppend];
+
+                    if (arg is Constant constant)
+                        append.Append(ConstToValidString(constant));
+                    else if (arg is IdentifierReference idRef && idRef.Identifier.IsGlobal)
+                        append.Append(_variableNames.translateGlobalForAppending(GetGlobalName(passInfo, idRef) ?? ""));
+                    
+                }
+
+
+                returns = (string[])returns.Clone();
+                for (int i = 0; i < returns.Length; i++)
+                    returns[i] = returns[i] + append.ToString();
+            }
+
+            SetLeftNames(passInfo, assignment, returns);
         }
-            return null;
+
+        var args = _variableNames.getCallArgs(callFuncName);
+        if (args != null)
+            SetCallArgNames(passInfo, fCall, args);
+
+        // Special arg setting for adding goal functions
+        if ((callFuncName == "AddSubGoal" || callFuncName == "AddTopGoal" || callFuncName == "AddFrontGoal")
+            && fCall.Args.Count > 1 && fCall.Args[1] is IdentifierReference goalIdGlobal)
+        {
+            string? goalIdName = GetGlobalName(passInfo, goalIdGlobal);
+            if (goalIdName != null)
+            {
+                var goalArgs = _variableNames.getGoalArgs(goalIdName);
+                if (goalArgs != null)
+                {
+                    string[] fullArgs = new string[3 + goalArgs.Length];
+                    goalArgs.CopyTo(fullArgs, 3);
+                    SetCallArgNames(passInfo, fCall, fullArgs);
+                }
+            }
+        }
+    }
+
+    // Returns the name of the function used in the function call
+    private string? GetCallFunctionName(FunctionRenameVariablesPassInfo info, FunctionCall fCall)
+    {
+        if (fCall.Function is TableAccess tableAccess && tableAccess.TableIndex is Constant funcName)
+            return funcName.String;
+        if (fCall.Function is IdentifierReference idRef)
+            return GetGlobalName(info, idRef);
+
+        return null;
     }
 
     // Set the assigned variable's name 
-    private static void SetLeftNames(FunctionRenameVariablesPassInfo passInfo, Assignment assignment, params string[] names) 
+    private void SetLeftNames(FunctionRenameVariablesPassInfo passInfo, Assignment assignment, params string[] names) 
     {
         for (int i = 0; i < names.Length && i < assignment.LeftList.Count; i++) 
         {
@@ -127,7 +195,7 @@ public class RenameVariablesWithContextPass : IPass
     }
 
     // Set the names of arguments of a function call. If names[i] is null, name will not be replaced.
-    private static void SetCallArgNames(FunctionRenameVariablesPassInfo passInfo, FunctionCall funcCall, params string[] names)
+    private void SetCallArgNames(FunctionRenameVariablesPassInfo passInfo, FunctionCall funcCall, params string[] names)
     {
         for (int i = 0; i < names.Length && i < funcCall.Args.Count; i++)
         {
@@ -147,7 +215,7 @@ public class RenameVariablesWithContextPass : IPass
         }
     }
 
-    private static void SetFunctionArgNames(Function func, params string[] names)
+    private void SetFunctionArgNames(Function func, params string[] names)
     {
         for (uint i = 0; i < names.Length && i < func.ParameterCount; i++) 
         {
@@ -173,10 +241,23 @@ public class RenameVariablesWithContextPass : IPass
         while (passInfo.Function.HasIdentifierNameInScope(passInfo.Block, newName))
         {
             occurances++;
-            newName = originalName + occurances;
+            newName = originalName + "_" + occurances;
         }
 
         return newName;
+    }
+
+    private static string ConstToValidString(Constant c) 
+    {
+        return (c.ConstType) switch
+        {
+            Constant.ConstantType.ConstNumber => c.Number.ToString(),
+            Constant.ConstantType.ConstInteger => c.Integer.ToString(),
+            Constant.ConstantType.ConstString => c.String,
+            Constant.ConstantType.ConstBool => c.Boolean.ToString(),
+            Constant.ConstantType.ConstNil => "nil",
+            _ => ""
+        };
     }
 }
 

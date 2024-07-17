@@ -1,4 +1,9 @@
 {
+  "globalsTranslatedForAppending":
+  {
+    "TARGET_SELF": "Self",
+    "TARGET_ENE_0": "Enemy"
+  },
   "funcs":
   {
     "GlobalActivate":
@@ -73,6 +78,10 @@
       [
         "ai",
         "distTarget"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
       ]
     },
     "GetOriginDist":
@@ -97,6 +106,10 @@
       [
         "ai",
         "hpTarget"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
       ]
     },
     "IsInterupt":
@@ -122,6 +135,58 @@
         "ai",
         "target",
         "effectId"
+      ],
+      "argsToAppendToReturn":
+      [
+        2
+      ]
+    },
+    "GetNumber":
+    {
+      "return":
+      [
+        "number"
+      ],
+      "args":
+      [
+        "ai",
+        "numberIndex"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetTimer":
+    {
+      "return":
+      [
+        "timer"
+      ],
+      "args":
+      [
+        "ai",
+        "timerIndex"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetStringIndexedNumber":
+    {
+      "return":
+      [
+        "num_"
+      ],
+      "args":
+      [
+        "ai",
+        "numberName"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
       ]
     },
     "GetMapHitRadius":
@@ -243,6 +308,38 @@
         "goal",
         "angle",
         "maxDistToWall"
+      ]
+    },
+    "FindAttack_Step":
+    {
+      "return":
+      [
+        "foundAttack"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "superStepDist",
+        "superStepPer",
+        "bkStepPer",
+        "leftStepPer",
+        "rightStepPer",
+        "safetyDist"
+      ]
+    },
+    "Counter_Act":
+    {
+      "return":
+      [
+        "shouldCounter"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "probabilityFactorPerHit",
+        "counterAttackId"
       ]
     }
   },

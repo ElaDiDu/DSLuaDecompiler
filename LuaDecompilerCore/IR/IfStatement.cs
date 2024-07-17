@@ -12,7 +12,7 @@ namespace LuaDecompilerCore.IR
         public CFG.BasicBlock? False = null;
         public CFG.BasicBlock? Follow = null;
         public bool IsElseIf = false;
-        
+
         public override bool MatchAny(Func<IIrNode, bool> condition)
         {
             var result = condition.Invoke(this);

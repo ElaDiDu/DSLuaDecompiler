@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -19,18 +20,22 @@ namespace LuaDecompilerCore.Annotations
         /// <summary>
         /// Contains info about args names and return names
         /// </summary>
-        public Dictionary<string, Dictionary<string, string[]>> calls { get; set; }
+        public Dictionary<string, CallNamingData> calls { get; set; }
 
         /// <summary>
         /// Contains info about goal args names
         /// </summary>
         public Dictionary<string, string[]> goals { get; set; }
 
+        public Dictionary<string, string> globalsTranslatedForAppending { get; set; }
+
+
         public AIVariableNames()
         {
             funcs = new();
             calls = new();
             goals = new();
+            globalsTranslatedForAppending = new();
         }
 
         public string[]? getCallArgs(string funcName) 
@@ -38,7 +43,7 @@ namespace LuaDecompilerCore.Annotations
             var callData = calls.TryGetValue(funcName, out var o) ? o : null;
             if (callData == null) return null;
 
-            return callData.TryGetValue("args", out var args) ? args : null;
+            return callData.args;
         }
 
         public string[]? getCallReturns(string funcName)
@@ -46,7 +51,15 @@ namespace LuaDecompilerCore.Annotations
             var callData = calls.TryGetValue(funcName, out var o) ? o : null;
             if (callData == null) return null;
 
-            return callData.TryGetValue("return", out var args) ? args : null;
+            return callData.@return;
+        }
+
+        public int[]? getArgsToAppendToReturn(string funcName) 
+        {
+            var callData = calls.TryGetValue(funcName, out var o) ? o : null;
+            if (callData == null) return null;
+
+            return callData.argsToAppendToReturn;
         }
 
         public string[]? getGoalArgs(string goalName)
@@ -76,6 +89,11 @@ namespace LuaDecompilerCore.Annotations
             return funcs.TryGetValue(funcName, out var argsO) ? argsO : null;
         }
 
+        public string? translateGlobalForAppending(string global) 
+        {
+            return globalsTranslatedForAppending.TryGetValue(global, out var arg) ? arg : global;
+        }
+
         public static AIVariableNames FromJson(string path) 
         {
             FileStream stream = File.OpenRead(path);
@@ -87,5 +105,16 @@ namespace LuaDecompilerCore.Annotations
 
             return result;
         }
+    }
+
+    public class CallNamingData 
+    {
+        public string[]? @return { get; set; }
+
+        public string[]? args { get; set; }
+
+        public int[]? argsToAppendToReturn { get; set; }
+
+        public CallNamingData() { }
     }
 }
