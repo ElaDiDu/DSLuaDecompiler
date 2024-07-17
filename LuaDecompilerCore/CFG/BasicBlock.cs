@@ -386,6 +386,9 @@ namespace LuaDecompilerCore.CFG
 
         public string? GetLocalName(Identifier identifier, Function? func) 
         {
+            if (!identifier.IsRegister)
+                return null;
+
             // Defined in this block
             if (IdentifierNames.ContainsKey(identifier))
                 return IdentifierNames[identifier];
@@ -394,9 +397,9 @@ namespace LuaDecompilerCore.CFG
             if (func != null) 
             {
                 foreach (var blockIndex in DominantBlocks) 
-                {
+                {    
                     var name = func.BlockList[(int)blockIndex].IdentifierNames.TryGetValue(identifier, out var n) ? n : null;
-                    if (name  != null) 
+                    if (name != null) 
                         return name;
                 }
             }

@@ -824,10 +824,10 @@ public class Lua50Decompiler : ILanguageDecompiler
         passManager.AddPass("detect-local-variables", new DetectLocalVariablesPass());
         // irfun.ArgumentNames = fun.LocalsAt(0);
         passManager.AddPass("rename-local-variables", new RenameVariablesPass());
-        passManager.AddPass("setup-local-naming-structure", new SetupLocalNamingStructurePass());
-        passManager.AddPass("rename-identifiers-by-context", new RenameVariablesWithContextPass());
         passManager.AddPass("solve-expressions", new SolveExpressionsPass());
         passManager.AddPass("parenthesize", new ParenthesizePass());
+        passManager.AddPass("setup-local-naming-structure", new SetupLocalNamingStructurePass());
+        passManager.AddPass("rename-identifiers-by-context", new RenameVariablesWithContextPass());
 
 
         passManager.AddPass("build-ast", new AstTransformPass());

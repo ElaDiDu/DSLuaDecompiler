@@ -403,7 +403,7 @@ namespace LuaDecompilerCore.IR
                 return null;
 
             // Is parameter
-            if (identifier.RegNum < ParameterCount) //TODO all param renames are generic, should change 
+            if (identifier.RegNum < ParameterCount)
             {
                 var result = ParameterNames.TryGetValue(identifier, out var n) ? n : null;
                 if (result == null && allowGenericRenames)

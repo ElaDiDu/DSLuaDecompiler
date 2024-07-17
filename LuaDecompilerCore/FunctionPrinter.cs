@@ -463,16 +463,20 @@ public partial class FunctionPrinter
         VisitFunction(closure.Function);
     }
 
-    private string? LookupIdentifierName(Identifier identifier, Function? currentFunction)
+    private string? LookupIdentifierName(Identifier identifier, Function? currentFunction, bool upSearch = false)
     {
         if (currentFunction == null)
             return null;
+        BasicBlock? currentBlock = CurrentBlock();
+        if (upSearch)
+            currentBlock = currentFunction.BlockList.LastOrDefault((BasicBlock)null);
+        
         return identifier.Type switch
         {
-            Identifier.IdentifierType.Register or Identifier.IdentifierType.RenamedRegister => currentFunction.GetIdentifierName(identifier, CurrentBlock()),
+            Identifier.IdentifierType.Register or Identifier.IdentifierType.RenamedRegister => currentFunction.GetIdentifierName(identifier, currentBlock),
             Identifier.IdentifierType.Global => currentFunction.Constants[(int)identifier.ConstantId].ToString(),
             Identifier.IdentifierType.UpValue when currentFunction.UpValueBindings.Count > 0 =>
-                LookupIdentifierName(currentFunction.UpValueBindings[(int)identifier.UpValueNum], LastFunction()),
+                LookupIdentifierName(currentFunction.UpValueBindings[(int)identifier.UpValueNum], LastFunction(), true),
             _ => null
         };
     }
