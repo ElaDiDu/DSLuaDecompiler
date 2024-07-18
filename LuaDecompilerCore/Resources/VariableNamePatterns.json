@@ -1,8 +1,91 @@
 {
   "globalsTranslatedForAppending":
   {
+    "AI_DIR_TYPE_CENTER": "Center",
+    "AI_DIR_TYPE_F": "Front",
+    "AI_DIR_TYPE_B": "Back",
+    "AI_DIR_TYPE_L": "Left",
+    "AI_DIR_TYPE_R": "Right",
+    "AI_DIR_TYPE_FL": "FrontLeft",
+    "AI_DIR_TYPE_FR": "FrontRight",
+    "AI_DIR_TYPE_BL": "BackLeft",
+    "AI_DIR_TYPE_BR": "BackRight",
+    "AI_DIR_TYPE_ToF": "ToFront",
+    "AI_DIR_TYPE_ToB": "ToBack",
+    "AI_DIR_TYPE_ToL": "ToLeft",
+    "AI_DIR_TYPE_ToR": "ToRight",
+    "AI_DIR_TYPE_ToFL": "ToFrontLeft",
+    "AI_DIR_TYPE_ToFR": "ToFrontRight",
+    "AI_DIR_TYPE_ToBL": "ToBackLeft",
+    "AI_DIR_TYPE_ToBR": "ToBackRight",
+    "AI_SPA_DIR_TYPE_TargetF": "TargetFront",
+    "AI_SPA_DIR_TYPE_ToTarget": "ToTarget",
+    "AI_SPA_DIR_TYPE_Absolute": "Absolute",
+    "DIST_Near": "Near",
+    "DIST_Middle": "Middle",
+    "DIST_Far": "Far",
+    "DIST_Out": "Out",
+    "DIST_None": "None",
+    "TARGET_NONE": "None",
     "TARGET_SELF": "Self",
-    "TARGET_ENE_0": "Enemy"
+    "TARGET_ENE_0": "Enemy",
+    "TARGET_FRI_0": "Friend",
+    "TARGET_EVENT": "Event",
+    "TARGET_LOCALPLAYER": "Local",
+    "TARGET_LowHp_Friend": "LowFriend",
+    "TARGET_INTERMEDIATE_POINT": "Intermediate",
+    "TARGET_TEAM_FORMATION": "Formation",
+    "TARGET_TEAM_LEADER": "Leader",
+    "TARGET_RIDE_0": "Ride",
+    "TARGET_SEARCH": "Search",
+    "TARGET_SOUND": "Sound",
+    "TARGET_HOSTPLAYER": "Host",
+    "POINT_INITIAL": "Initial",
+    "POINT_EVENT": "PointEvent",
+    "POINT_MOVE_POINT": "MovePoint",
+    "POINT_INIT_POSE": "Init",
+    "AI_EXCEL_THINK_PARAM_TYPE__NONE": "None",
+    "AI_EXCEL_THINK_PARAM_TYPE__maxBackhomeDist": "MaxHomeDist",
+    "AI_EXCEL_THINK_PARAM_TYPE__backhomeDist": "HomeDist",
+    "AI_EXCEL_THINK_PARAM_TYPE__backhomeBattleDist": "HomeBattleDist",
+    "AI_EXCEL_THINK_PARAM_TYPE__nonBattleActLife": "NonBattleActLife",
+    "AI_EXCEL_THINK_PARAM_TYPE__BattleStartDist": "BattleStartDist",
+    "AI_EXCEL_THINK_PARAM_TYPE__bMoveOnHearSound": "MoveOnHear",
+    "AI_EXCEL_THINK_PARAM_TYPE__CannotMoveAction": "CannotMoveAct",
+    "AI_EXCEL_THINK_PARAM_TYPE__battleGoalID": "BattleGoal",
+    "AI_EXCEL_THINK_PARAM_TYPE__BackHome_LookTargetTime": "HomeLookTargetTime",
+    "AI_EXCEL_THINK_PARAM_TYPE__BackHome_LookTargetDist": "HomeLookTargetDist",
+    "AI_EXCEL_THINK_PARAM_TYPE__BackHomeLife_OnHitEnemyWall": "HomeOnHitWallLife",
+    "AI_EXCEL_THINK_PARAM_TYPE__callHelp_IsCall": "IsCall",
+    "AI_EXCEL_THINK_PARAM_TYPE__callHelp_IsReply": "IsReply",
+    "AI_EXCEL_THINK_PARAM_TYPE__callHelp_MyPeerId": "PeerId",
+    "AI_EXCEL_THINK_PARAM_TYPE__callHelp_CallPeerId": "CallPeerId",
+    "AI_EXCEL_THINK_PARAM_TYPE__callHelp_DelayTime": "CallDelay",
+    "AI_EXCEL_THINK_PARAM_TYPE__callHelp_CallActionId": "CallAction",
+    "AI_EXCEL_THINK_PARAM_TYPE__callHelp_ReplyBehaviorType": "ReplyBehaviorType",
+    "AI_EXCEL_THINK_PARAM_TYPE__callHelp_ForgetTimeByArrival": "CallForgetTime",
+    "AI_EXCEL_THINK_PARAM_TYPE__callHelp_MinWaitTime": "CallMinWait",
+    "AI_EXCEL_THINK_PARAM_TYPE__callHelp_MaxWaitTime": "CallMaxWait",
+    "AI_EXCEL_THINK_PARAM_TYPE__callHelp_ReplyActionId": "ReplyAction",
+    "AI_EXCEL_THINK_PARAM_TYPE__thinkAttr_doAdmirer": "DoAdmire",
+    "AI_EXCEL_THINK_PARAM_TYPE__goalAction_ToDisappear": "DisappearAct",
+    "AI_EXCEL_THINK_PARAM_TYPE__goalAction_ToCaution": "CautionAct",
+    "AI_EXCEL_THINK_PARAM_TYPE__goalAction_ToCautionImportant": "CautionImportantAct",
+    "AI_EXCEL_THINK_PARAM_TYPE__changeStateAction_ToNormal": "ToNormalAct",
+    "AI_EXCEL_THINK_PARAM_TYPE__caravanRole": "CaravanRole",
+    "AI_EXCEL_THINK_PARAM_TYPE__goalAction_ToSearchLv1": "Search1Act",
+    "AI_EXCEL_THINK_PARAM_TYPE__goalAction_ToSearchLv2": "Search2Act",
+    "AI_EXCEL_THINK_PARAM_TYPE__rangedAttackId": "RangeAttackId",
+    "AI_EXCEL_THINK_PARAM_TYPE__IsGuard_Act": "IsGuard",
+    "AI_EXCEL_THINK_PARAM_TYPE__spEffectId_RangedAttack": "RangeAttackEffect",
+    "AI_EXCEL_THINK_PARAM_TYPE__shiftAnimeId_RangedAttack": "RangeAttackOnEffectId",
+    "AI_EXCEL_THINK_PARAM_TYPE__enableWeaponOnOff": "ToggleWeapon",
+    "AI_EXCEL_THINK_PARAM_TYPE__weaponOffSpecialEffectId": "WeaponOffEffect",
+    "AI_EXCEL_THINK_PARAM_TYPE__weaponOnSpecialEffectId": "WeaponOnEffect",
+    "AI_EXCEL_THINK_PARAM_TYPE__weaponOffAnimId": "WeaponOffAnim",
+    "AI_EXCEL_THINK_PARAM_TYPE__weaponOnAnimId": "WeaponOnAnim",
+    "AI_EXCEL_THINK_PARAM_TYPE__surpriseAnimId": "SurpriseAnim",
+    "AI_EXCEL_THINK_PARAM_TYPE__backToHomeStuckAct": "HomeStuckAct"
   },
   "funcs":
   {
@@ -96,6 +179,54 @@
         "distTarget"
       ]
     },
+    "GetDistXZ":
+    {
+      "return":
+      [
+        "distanceXZ"
+      ],
+      "args":
+      [
+        "ai",
+        "distTarget"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetDistY":
+    {
+      "return":
+      [
+        "distanceY"
+      ],
+      "args":
+      [
+        "ai",
+        "distTarget"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetDistYSigned":
+    {
+      "return":
+      [
+        "distanceY"
+      ],
+      "args":
+      [
+        "ai",
+        "distTarget"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
     "GetHpRate":
     {
       "return":
@@ -143,13 +274,14 @@
     },
     "GetNumber":
     {
+      "//comment": "First arg can be AiFunc/GoalFunc/AiPlatoonFunc, do not deduce",
       "return":
       [
         "number"
       ],
       "args":
       [
-        "ai",
+        null,
         "numberIndex"
       ],
       "argsToAppendToReturn":
@@ -159,13 +291,14 @@
     },
     "GetTimer":
     {
+      "//comment": "First arg can be AiFunc/GoalFunc/AiPlatoonFunc, do not deduce",
       "return":
       [
         "timer"
       ],
       "args":
       [
-        "ai",
+        null,
         "timerIndex"
       ],
       "argsToAppendToReturn":
@@ -227,6 +360,228 @@
         "max"
       ]
     },
+    "GetEventRequest":
+    {
+      "return":
+      [
+        "eventRequest"
+      ],
+      "args":
+      [
+        "ai",
+        "requestSlot"
+      ]
+    },
+    "GetPrevTargetState":
+    {
+      "return":
+      [
+        "prevTargetingState"
+      ],
+      "args":
+      [
+        "ai"
+      ]
+    },
+    "GetCurrTargetType":
+    {
+      "return":
+      [
+        "currTargetingState"
+      ],
+      "args":
+      [
+        "ai"
+      ]
+    },
+    "AddObserveSpecialEffectAttribute":
+    {
+      "args":
+      [
+        "ai",
+        "targetObserved",
+        "effectObserved"
+      ]
+    },
+    "GetNPCActProb":
+    {
+      "return":
+      [
+        "actProb"
+      ],
+      "args":
+      [
+        "ai",
+        "actId"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetNpcThinkParamID":
+    {
+      "return":
+      [
+        "thinkParam"
+      ],
+      "args":
+      [
+        "ai"
+      ]
+    },
+    "AddTopGoal":
+    {
+      "return":
+      [
+        "topGoal"
+      ],
+      "args":
+      [
+        "ai",
+        "goalId",
+        "goaLife"
+      ]
+    },
+    "FollowPath":
+    {
+      "args":
+      [
+        "ai",
+        "moveTarget",
+        "directionFromTarget",
+        "stopDistance",
+        "walk",
+        "directionalDistance",
+        "xzDistanceOnly",
+        "defaultOrientationAndStopDist",
+        "closeProximityMode"
+      ]
+    },
+    "GetAbsoluteAngleFromTarget":
+    {
+      "return":
+      [
+        "angleToTarget"
+      ],
+      "args":
+      [
+        "ai",
+        "target"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetRelativeAngleFromTarget":
+    {
+      "return":
+      [
+        "angleToTarget"
+      ],
+      "args":
+      [
+        "ai",
+        "target"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetExcelParam":
+    {
+      "return":
+      [
+        "param"
+      ],
+      "args":
+      [
+        "ai",
+        "paramType"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetExistMeshOnLineDist":
+    {
+      "return":
+      [
+        "distToMesh"
+      ],
+      "args":
+      [
+        "ai",
+        "targetOrigin",
+        "directionFromTarget",
+        "maxDistance"
+      ]
+    },
+    "GetExistMeshOnLineDistEx":
+    {
+      "return":
+      [
+        "distToMesh"
+      ],
+      "args":
+      [
+        "ai",
+        "targetOrigin",
+        "directionFromTarget",
+        "maxDistance",
+        "lineWidth",
+        "lineStartDist"
+      ]
+    },
+    "GetExistMeshOnLineDistSpecifyAngle":
+    {
+      "return":
+      [
+        "distToMesh"
+      ],
+      "args":
+      [
+        "ai",
+        "targetOrigin",
+        "angle",
+        "maxDistance",
+        "spatialDirection"
+      ]
+    },
+    "GetExistMeshOnLineDistSpecifyAngleEx":
+    {
+      "return":
+      [
+        "distToMesh"
+      ],
+      "args":
+      [
+        "ai",
+        "targetOrigin",
+        "angle",
+        "maxDistance",
+        "spatialDirection",
+        "lineWidth",
+        "lineStartDist"
+      ]
+    },
+    "IsExistMeshOnLine":
+    {
+      "return":
+      [
+        "existMesh"
+      ],
+      "args":
+      [
+        "ai",
+        "targetOrigin",
+        "angle",
+        "maxDistance"
+      ]
+    },
     "AddSubGoal":
     {
       "return":
@@ -237,7 +592,7 @@
       [
         "goal",
         "goalId",
-        "life"
+        "goalLife"
       ]
     },
     "Common_Battle_Activate":
@@ -261,8 +616,8 @@
         "stopDist",
         "canRunDist",
         "forceRunMinDist",
-        "runProb",
-        "guardProb",
+        "runProbability",
+        "guardProbability",
         "walkLife",
         "runLife"
       ]
@@ -310,24 +665,6 @@
         "maxDistToWall"
       ]
     },
-    "FindAttack_Step":
-    {
-      "return":
-      [
-        "foundAttack"
-      ],
-      "args":
-      [
-        "ai",
-        "goal",
-        "superStepDist",
-        "superStepPer",
-        "bkStepPer",
-        "leftStepPer",
-        "rightStepPer",
-        "safetyDist"
-      ]
-    },
     "Counter_Act":
     {
       "return":
@@ -340,6 +677,569 @@
         "goal",
         "probabilityFactorPerHit",
         "counterAttackId"
+      ]
+    },
+    "ReactBackstab_Act":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "stepReactionType",
+        "reactAttackId",
+        "attackProbability"
+      ]
+    },
+    "SetCoolTime":
+    {
+      "return":
+      [
+        "adjustedProbability"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "animationId",
+        "cooldown",
+        "returnNotInCooldown",
+        "returnInCooldown"
+      ]
+    },
+    "InsideDir":
+    {
+      "return":
+      [
+        "isInside"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "angleStart",
+        "angleWidth"
+      ]
+    },
+    "InsideRange":
+    {
+      "return":
+      [
+        "isInside"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "angleStart",
+        "angleWidth",
+        "minDist",
+        "maxDist"
+      ]
+    },
+    "GetTargetAngle":
+    {
+      "return":
+      [
+        "targetInAngle"
+      ],
+      "args":
+      [
+        "ai",
+        "target"
+      ]
+    },
+    "Backstab_Act":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "observeSlot",
+        "stopDist",
+        "cooldownTimerSlot",
+        "cooldown"
+      ]
+    },
+    "Parry_Act":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "parryMaxDist",
+        "enemyLookToMeForParryMaxDist",
+        "critMaxDist",
+        "enemyLookToMeForCritMaxDist"
+      ]
+    },
+    "Approach_or_Leave_Act":
+    {
+      "args":
+      [
+        "ai",
+        "goal",
+        "minDist",
+        "maxDist",
+        "runDist",
+        "guardProb"
+      ]
+    },
+    "Shoot_Act":
+    {
+      "args":
+      [
+        "ai",
+        "goal",
+        "firstAttack",
+        "nextAttack",
+        "comboLength"
+      ]
+    },
+    "FindShoot_Act":
+    {
+      "return":
+      [
+        "actType"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "probability1",
+        "probability2",
+        "probability3",
+        "distance1",
+        "distance2",
+        "distance3"
+      ]
+    },
+    "FindGuardFinish_Act":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability"
+      ]
+    },
+    "FindGuardBreak_Act":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability"
+      ]
+    },
+    "MissSwing_Act":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability"
+      ]
+    },
+    "FarDamaged_Act":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability"
+      ]
+    },
+    "SuccessGuard_Attack":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability",
+        "attack"
+      ]
+    },
+    "SuccessGuard_Act":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability"
+      ]
+    },
+    "RebByOpGuard_Step":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability",
+        "backstepProbability",
+        "leftstepProbability",
+        "rightstepProbability",
+        "safetyDist"
+      ]
+    },
+    "MissSwingSelf_Step":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability",
+        "backstepProbability",
+        "leftstepProbability",
+        "rightstepProbability",
+        "safetyDist"
+      ]
+    },
+    "Shoot_2dist":
+    {
+      "return":
+      [
+        "actType"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "distance1",
+        "distance2",
+        "probability1",
+        "probability2"
+      ]
+    },
+    "Shoot_1kind":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability"
+      ]
+    },
+    "UseItem_Act":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability"
+      ]
+    },
+    "MissSwing_Attack":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability",
+        "attack"
+      ]
+    },
+    "MissSwing_Int":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability"
+      ]
+    },
+    "GuardBreak_Attack":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability",
+        "attack"
+      ]
+    },
+    "GuardBreak_Act":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability"
+      ]
+    },
+    "Damaged_Step_or_Guard":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability",
+        "stepProbability",
+        "backstepProbability",
+        "leftstepProbability",
+        "rightstepProbability",
+        "safetyDist",
+        "leaveProbability",
+        "sidewayProbability",
+        "stopDist"
+      ]
+    },
+    "Damaged_Step":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability",
+        "stepProbability",
+        "backstepProbability",
+        "leftstepProbability",
+        "rightstepProbability",
+        "safetyDist"
+      ]
+    },
+    "Damaged_Guard":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability",
+        "leaveProbability",
+        "sidewayProbability",
+        "stopDist"
+      ]
+    },
+    "Damaged_Act":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability"
+      ]
+    },
+    "FindAttack_Step_or_Guard":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability",
+        "stepProbability",
+        "backstepProbability",
+        "leftstepProbability",
+        "rightstepProbability",
+        "safetyDist",
+        "leaveProbability",
+        "sidewayProbability",
+        "stopDist"
+      ]
+    },
+    "FindAttack_Guard":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability",
+        "leaveProbability",
+        "sidewayProbability",
+        "stopDist"
+      ]
+    },
+    "FindAttack_Step":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability",
+        "backstepProbability",
+        "leftstepProbability",
+        "rightstepProbability",
+        "safetyDist"
+      ]
+    },
+    "FindAttack_Act":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability"
+      ]
+    },
+    "FindAttack_Step_NPCPlayer":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability",
+        "backstepProbability",
+        "leftstepProbability",
+        "rightstepProbability"
+      ]
+    },
+    "Damaged_StepCount_NPCPlayer":
+    {
+      "return":
+      [
+        "reacted"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "reactDistance",
+        "reactProbability",
+        "attackProbability",
+        "attack",
+        "backstepProbability",
+        "leftstepProbability",
+        "rightstepProbability"
+      ]
+    },
+    "NPC_Approach_Act_Flex":
+    {
+      "args":
+      [
+        "ai",
+        "goal",
+        "stopDist",
+        "canRunDist",
+        "forceRunMinDist",
+        "runProbability",
+        "guardProbability",
+        "walkLife",
+        "runLife"
       ]
     }
   },

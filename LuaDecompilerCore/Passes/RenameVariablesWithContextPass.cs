@@ -177,7 +177,7 @@ public class RenameVariablesWithContextPass : IPass
         return null;
     }
 
-    // Set the assigned variable's name 
+    // Set the assigned variable's name. If names[i] is null, name will not be replaced.
     private void SetLeftNames(FunctionRenameVariablesPassInfo passInfo, Assignment assignment, params string[] names) 
     {
         for (int i = 0; i < names.Length && i < assignment.LeftList.Count; i++) 
@@ -247,17 +247,30 @@ public class RenameVariablesWithContextPass : IPass
         return newName;
     }
 
+    // Slow
+    private static string[] IllegalSubstrings = { " ", "\\", "/", "?", ".", "\n", "\t", ",", "\"", "\'", "-" };
+
+    private static string ValidateStringForLuaVar(string str) 
+    {
+        foreach (var illegal in IllegalSubstrings) 
+        {
+            str = str.Replace(illegal, null);
+        }
+
+        return str;
+    }
+
     private static string ConstToValidString(Constant c) 
     {
         return (c.ConstType) switch
         {
-            Constant.ConstantType.ConstNumber => c.Number.ToString(),
+            Constant.ConstantType.ConstNumber => c.Number.ToString().Replace('.', '_'),
             Constant.ConstantType.ConstInteger => c.Integer.ToString(),
-            Constant.ConstantType.ConstString => c.String,
+            Constant.ConstantType.ConstString => ValidateStringForLuaVar(c.String),
             Constant.ConstantType.ConstBool => c.Boolean.ToString(),
             Constant.ConstantType.ConstNil => "nil",
             _ => ""
-        };
+        } ;
     }
 }
 
