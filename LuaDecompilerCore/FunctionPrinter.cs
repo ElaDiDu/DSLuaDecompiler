@@ -11,7 +11,7 @@ public partial class FunctionPrinter
 {
     private StringBuilder _builder = new();
     private readonly List<Function> _functionStack = new();
-    private readonly List<BasicBlock> _blockStack = new();
+    private readonly Dictionary<Function, BasicBlock> _currentBlocks = new();
     private int _indentLevel;
     private bool _insertDebugComments;
     private bool _debugPrint;
@@ -106,14 +106,11 @@ public partial class FunctionPrinter
         _functionStack.RemoveAt(_functionStack.Count - 1);
     }
 
-    private void PushBlock(BasicBlock block)
+    private void SetCurrentBlock(BasicBlock block)
     {
-        _blockStack.Add(block);
-    }
-
-    private void PopBlock()
-    {
-        _blockStack.RemoveAt(_blockStack.Count - 1);
+        var currentFunc = CurrentFunction();
+        if (currentFunc != null)
+            _currentBlocks[currentFunc] = block;
     }
 
     private Function? CurrentFunction()
@@ -128,12 +125,19 @@ public partial class FunctionPrinter
 
     private BasicBlock? CurrentBlock() 
     {
-        return _blockStack.Count > 0 ? _blockStack[^1] : null;
+        var currentFunc = CurrentFunction();
+        if (currentFunc == null)
+            return null;
+
+        return _currentBlocks.TryGetValue(currentFunc, out var block) ? block : null;
     }
 
-    private BasicBlock? LastBlock()
+    private BasicBlock? ActiveBlock(Function? func)
     {
-        return _blockStack.Count > 1 ? _blockStack[^2] : null;
+        if (func == null) 
+            return null;
+
+        return _currentBlocks.TryGetValue(func, out var block) ? block : null;
     }
 
     private void Indent(bool half = false)
@@ -314,7 +318,7 @@ public partial class FunctionPrinter
                 {
                     continue;
                 }
-                PushBlock(b);
+                SetCurrentBlock(b);
 
                 Indent(true);
                 Append(b.ToStringWithLoop());
@@ -347,8 +351,6 @@ public partial class FunctionPrinter
                     Append(')');
                     NewLine();
                 }
-
-                PopBlock();
             }
         }
         if (function.FunctionId != 0)
@@ -366,11 +368,10 @@ public partial class FunctionPrinter
 
     private void VisitBasicBlock(BasicBlock basicBlock, bool printInfiniteLoop = false)
     {
-        PushBlock(basicBlock);
+        SetCurrentBlock(basicBlock);
         if (_debugPrint)
         {
             Append(basicBlock.Name);
-            PopBlock();
             return;
         }
 
@@ -419,8 +420,6 @@ public partial class FunctionPrinter
                 NewLine();
             }
         }
-
-        PopBlock();
     }
 
     private void VisitEmptyExpression()
@@ -463,20 +462,17 @@ public partial class FunctionPrinter
         VisitFunction(closure.Function);
     }
 
-    private string? LookupIdentifierName(Identifier identifier, Function? currentFunction, bool upSearch = false)
+    private string? LookupIdentifierName(Identifier identifier, Function? currentFunction, BasicBlock? currentBlock)
     {
         if (currentFunction == null)
             return null;
-        BasicBlock? currentBlock = CurrentBlock();
-        if (upSearch)
-            currentBlock = currentFunction.BlockList.LastOrDefault((BasicBlock)null);
         
         return identifier.Type switch
         {
             Identifier.IdentifierType.Register or Identifier.IdentifierType.RenamedRegister => currentFunction.GetIdentifierName(identifier, currentBlock),
             Identifier.IdentifierType.Global => currentFunction.Constants[(int)identifier.ConstantId].ToString(),
             Identifier.IdentifierType.UpValue when currentFunction.UpValueBindings.Count > 0 =>
-                LookupIdentifierName(currentFunction.UpValueBindings[(int)identifier.UpValueNum], LastFunction(), true),
+                LookupIdentifierName(currentFunction.UpValueBindings[(int)identifier.UpValueNum], LastFunction(), ActiveBlock(LastFunction())),
             _ => null
         };
     }
@@ -489,7 +485,7 @@ public partial class FunctionPrinter
             return;
         }
 
-        if (LookupIdentifierName(identifier, CurrentFunction()) is { } name)
+        if (LookupIdentifierName(identifier, CurrentFunction(), CurrentBlock()) is { } name)
         {
             Append(name);
             return;
@@ -754,7 +750,7 @@ public partial class FunctionPrinter
         }
         if (assignment is { IsFunctionDeclaration: true, Left: IdentifierReference ir, Right: Closure c })
         {
-            VisitFunction(c.Function, LookupIdentifierName(ir.Identifier, CurrentFunction()));
+            VisitFunction(c.Function, LookupIdentifierName(ir.Identifier, CurrentFunction(), CurrentBlock()));
             return;
         }
 

@@ -462,7 +462,7 @@
     {
       "return":
       [
-        "angleToTarget"
+        "angleTo"
       ],
       "args":
       [
@@ -478,7 +478,23 @@
     {
       "return":
       [
-        "angleToTarget"
+        "angleTo"
+      ],
+      "args":
+      [
+        "ai",
+        "target"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetToTargetAngle":
+    {
+      "return":
+      [
+        "angleTo"
       ],
       "args":
       [
@@ -605,6 +621,17 @@
         "acts",
         "actAfter",
         "paramTbls"
+      ]
+    },
+    "Common_Battle_Activate_ForCommonNPC":
+    {
+      "args":
+      [
+        "ai",
+        "goal",
+        "probabilities",
+        "acts",
+        "actAfter"
       ]
     },
     "Approach_Act_Flex":
