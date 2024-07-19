@@ -50,24 +50,30 @@ public class RenameVariablesWithContextPass : IPass
                     else if (right is Closure closure)
                     {
                         string? funcName = null;
+                        bool global = false;
 
                         // function GlobalFunc(x)
                         if (left is IdentifierReference idRef && idRef.Identifier.IsGlobal)
+                        {
                             funcName = GetGlobalName(passInfo, idRef);
+                            global = true;
+                        }
 
                         // Goal.TableFunc = function()
                         else if (left is TableAccess tableAccess && tableAccess.Table is IdentifierReference table
                         && GetGlobalName(passInfo, table) is string tableName && tableName.Equals("Goal") && tableAccess.TableIndex is Constant funcNameConst)
+                        {
                             funcName = funcNameConst.String;
+                            global = false;
+                        }
 
-                        if (funcName != null && _variableNames.getFuncArgs(funcName) is string[] args)
+                        if (funcName != null && _variableNames.getFuncArgs(funcName, global) is string[] args)
                             SetFunctionArgNames(closure.Function, args);
                     }
                 }
-                else if (instruction is IfStatement ifStatement)
+                else
                 {
-                    Console.WriteLine(ifStatement);
-                    foreach (var expression in ifStatement.Condition.GetExpressions())
+                    foreach (var expression in instruction.GetExpressions())
                     {
                         if (expression is FunctionCall fCall)
                         {
@@ -75,29 +81,6 @@ public class RenameVariablesWithContextPass : IPass
                         }
                     }
                 }
-                else if (instruction is ConditionalJumpBase conditionalJump) 
-                {
-                    foreach (var expression in conditionalJump.Condition.GetExpressions())
-                    {
-                        if (expression is FunctionCall fCall)
-                        {
-                            RenameVariablesInFunctionCall(passInfo, fCall);
-                        }
-                    }
-                }
-                /*
-                else if (instruction is GenericFor genericFor) 
-                {
-                    if (genericFor.Iterator.Right is FunctionCall fCall) 
-                    {
-                        RenameVariablesInFunctionCall(passInfo, fCall, genericFor.Iterator);
-                    }
-                }
-                else if (instruction is NumericFor numericFor) 
-                {
-                    numericFor
-                }
-                */
             }
         }
 

@@ -67,26 +67,33 @@ namespace LuaDecompilerCore.Annotations
             return goals.TryGetValue(goalName, out var o) ? o : null;
         }
 
+
         // Act992 or Act2 or Act07
         private static Regex actPattern = new Regex(@"\w*Act[0-9][0-9]?[0-9]?\b");
 
-        public string[]? getFuncArgs(string funcName)
+        // Kengeki382 or Kengeki3 Kengeki38
+        private static Regex kengekiPattern = new Regex(@"\w*Kengeki[0-9][0-9]?[0-9]?\b");
+
+        public string[]? getFuncArgs(string funcName, bool global = false)
         {
             // Take care of non-table goals
-            if (funcName.EndsWith("_Activate"))
-                return funcs.TryGetValue("GlobalActivate", out var args) ? args : null;
-            if (funcName.EndsWith("_Update"))
-                return funcs.TryGetValue("GlobalUpdate", out var args) ? args : null;
-            if (funcName.EndsWith("_Terminate"))
-                return funcs.TryGetValue("GlobalTerminate", out var args) ? args : null;
-            if (funcName.EndsWith("_Interupt")) // The typo is intentional
-                return funcs.TryGetValue("GlobalInterrupt", out var args) ? args : null;
+            if (global)
+            {
+                if (funcName.EndsWith("_Activate"))
+                    return funcs.TryGetValue("GlobalActivate", out var args) ? args : null;
+                if (funcName.EndsWith("_Update"))
+                    return funcs.TryGetValue("GlobalUpdate", out var args) ? args : null;
+                if (funcName.EndsWith("_Terminate"))
+                    return funcs.TryGetValue("GlobalTerminate", out var args) ? args : null;
+                if (funcName.EndsWith("_Interupt")) // The typo is intentional
+                    return funcs.TryGetValue("GlobalInterrupt", out var args) ? args : null;
+            }
 
             // Acts
-            if (actPattern.IsMatch(funcName) || funcName.Contains("ActAfter"))
+            if (actPattern.IsMatch(funcName) || funcName.Contains("ActAfter") || kengekiPattern.IsMatch(funcName))
                 return funcs.TryGetValue("Acts", out var args) ? args : null;
 
-            return funcs.TryGetValue(funcName, out var argsO) ? argsO : null;
+            return funcs.TryGetValue(funcName, out var args_) ? args_ : null;
         }
 
         public string? translateGlobalForAppending(string global) 

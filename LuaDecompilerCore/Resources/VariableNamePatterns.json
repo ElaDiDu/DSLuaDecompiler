@@ -142,7 +142,20 @@
       "goal",
       "battleActivatedCount"
     ],
+    "Kengeki_Activate":
+    [
+      "self",
+      "ai",
+      "goal",
+      null
+    ],
     "Acts":
+    [
+      "ai",
+      "goal",
+      "paramTbl"
+    ],
+    "NoAction":
     [
       "ai",
       "goal",
@@ -227,16 +240,96 @@
         1
       ]
     },
-    "GetHpRate":
+    "GetHp":
     {
       "return":
       [
-        "hpRate"
+        "hp"
       ],
       "args":
       [
         "ai",
         "hpTarget"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetHpRate":
+    {
+      "return":
+      [
+        "hpRatio"
+      ],
+      "args":
+      [
+        "ai",
+        "hpTarget"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetSp":
+    {
+      "return":
+      [
+        "stamina"
+      ],
+      "args":
+      [
+        "ai",
+        "staminaTarget"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetSpRate":
+    {
+      "return":
+      [
+        "staminaRatio"
+      ],
+      "args":
+      [
+        "ai",
+        "staminaTarget"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetSA":
+    {
+      "return":
+      [
+        "poise"
+      ],
+      "args":
+      [
+        "ai",
+        "poiseTarget"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
+      ]
+    },
+    "GetTargetSARate":
+    {
+      "return":
+      [
+        "poiseRatio"
+      ],
+      "args":
+      [
+        "ai",
+        "poiseTarget"
       ],
       "argsToAppendToReturn":
       [
@@ -598,6 +691,18 @@
         "maxDistance"
       ]
     },
+    "GetSpecialEffectActivateInterruptType":
+    {
+      "return":
+      [
+        "interruptEffect"
+      ],
+      "args":
+      [
+        "ai",
+        "effectsActivatedUntilReturn"
+      ]
+    },
     "AddSubGoal":
     {
       "return":
@@ -612,6 +717,18 @@
       ]
     },
     "Common_Battle_Activate":
+    {
+      "args":
+      [
+        "ai",
+        "goal",
+        "probabilities",
+        "acts",
+        "actAfter",
+        "paramTbls"
+      ]
+    },
+    "Common_Kengeki_Activate":
     {
       "args":
       [
@@ -1267,6 +1384,30 @@
         "guardProbability",
         "walkLife",
         "runLife"
+      ]
+    },
+    "ReturnKengekiSpecialEffect":
+    {
+      "return":
+      [
+        "kengekiEffect"
+      ],
+      "args":
+      [
+        "ai"
+      ]
+    },
+    "GetKengekiSpecialEffect":
+    {
+      "return":
+      [
+        "isKengeki"
+      ],
+      "args":
+      [
+        "ai",
+        "goal",
+        "effect"
       ]
     }
   },

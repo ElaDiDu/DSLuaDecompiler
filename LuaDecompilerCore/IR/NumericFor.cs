@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using LuaDecompilerCore.CFG;
 
@@ -39,6 +40,20 @@ namespace LuaDecompilerCore.IR
             result = result || (Initial != null && Initial.MatchAny(condition));
             result = result || (Limit != null && Limit.MatchAny(condition));
             result = result || Increment.MatchAny(condition);
+            return result;
+        }
+
+        public override List<Expression> GetExpressions()
+        {
+            var result = new List<Expression>();
+
+            if (Initial != null) 
+                result.AddRange(Initial.GetExpressions());
+            if (Limit != null)
+                result.AddRange(Limit.GetExpressions());
+            result.AddRange(Increment.GetExpressions());
+
+
             return result;
         }
     }

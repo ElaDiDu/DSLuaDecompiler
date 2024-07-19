@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using LuaDecompilerCore.CFG;
 
 namespace LuaDecompilerCore.IR
@@ -27,6 +28,11 @@ namespace LuaDecompilerCore.IR
             var result = condition.Invoke(this);
             result = result || Iterator.MatchAny(condition);
             return result;
+        }
+
+        public override List<Expression> GetExpressions()
+        {
+            return Iterator.GetExpressions();
         }
     }
 }
