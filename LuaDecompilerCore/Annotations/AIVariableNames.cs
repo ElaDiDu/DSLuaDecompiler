@@ -38,7 +38,7 @@ namespace LuaDecompilerCore.Annotations
             globalsTranslatedForAppending = new();
         }
 
-        public string[]? getCallArgs(string funcName) 
+        public string[]? GetCallArgs(string funcName) 
         {
             var callData = calls.TryGetValue(funcName, out var o) ? o : null;
             if (callData == null) return null;
@@ -46,7 +46,7 @@ namespace LuaDecompilerCore.Annotations
             return callData.args;
         }
 
-        public string[]? getCallReturns(string funcName)
+        public string[]? GetCallReturns(string funcName)
         {
             var callData = calls.TryGetValue(funcName, out var o) ? o : null;
             if (callData == null) return null;
@@ -54,7 +54,7 @@ namespace LuaDecompilerCore.Annotations
             return callData.@return;
         }
 
-        public int[]? getArgsToAppendToReturn(string funcName) 
+        public int[]? GetArgsToAppendToReturn(string funcName) 
         {
             var callData = calls.TryGetValue(funcName, out var o) ? o : null;
             if (callData == null) return null;
@@ -62,19 +62,19 @@ namespace LuaDecompilerCore.Annotations
             return callData.argsToAppendToReturn;
         }
 
-        public string[]? getGoalArgs(string goalName)
+        public string[]? GetGoalArgs(string goalName)
         {
             return goals.TryGetValue(goalName, out var o) ? o : null;
         }
 
 
         // Act992 or Act2 or Act07
-        private static Regex actPattern = new Regex(@"\w*Act[0-9][0-9]?[0-9]?\b");
+        private static Regex ActPattern = new Regex(@"\w*Act[0-9][0-9]?[0-9]?\b");
 
         // Kengeki382 or Kengeki3 Kengeki38
-        private static Regex kengekiPattern = new Regex(@"\w*Kengeki[0-9][0-9]?[0-9]?\b");
+        private static Regex KengekiPattern = new Regex(@"\w*Kengeki[0-9][0-9]?[0-9]?\b");
 
-        public string[]? getFuncArgs(string funcName, bool global = false)
+        public string[]? GetFuncArgs(string funcName, bool global)
         {
             // Take care of non-table goals
             if (global)
@@ -90,13 +90,13 @@ namespace LuaDecompilerCore.Annotations
             }
 
             // Acts
-            if (actPattern.IsMatch(funcName) || funcName.Contains("ActAfter") || kengekiPattern.IsMatch(funcName))
+            if (ActPattern.IsMatch(funcName) || funcName.Contains("ActAfter") || KengekiPattern.IsMatch(funcName))
                 return funcs.TryGetValue("Acts", out var args) ? args : null;
 
             return funcs.TryGetValue(funcName, out var args_) ? args_ : null;
         }
 
-        public string? translateGlobalForAppending(string global) 
+        public string? TranslateGlobalForAppending(string global) 
         {
             return globalsTranslatedForAppending.TryGetValue(global, out var arg) ? arg : global;
         }

@@ -425,7 +425,7 @@ namespace LuaDecompilerCore.IR
             return null;
         }
 
-        public void SetIdentifierName(Identifier identifier, BasicBlock? block, string name) 
+        public void SetIdentifierName(Identifier identifier, BasicBlock? block, string name, int priority = 0) 
         {
             if (!identifier.IsRegister)
                 return;
@@ -434,7 +434,7 @@ namespace LuaDecompilerCore.IR
             if (identifier.RegNum < ParameterCount)
                 ParameterNames[identifier] = name;
             else if (block != null)
-                block.SetLocalName(identifier, this, name);
+                block.SetLocalName(identifier, this, name, priority);
         }
         public bool IsVariableContextRenamed(Identifier identifier, BasicBlock? block) => GetIdentifierName(identifier, block, false) != null;
 
@@ -447,6 +447,49 @@ namespace LuaDecompilerCore.IR
                 return block.HasIdentifierNameInScope(name, this);
 
             return false;
+        }
+
+        /// <summary>
+        /// Adjusts repeat variable names with suffixes by order of occurance by scope
+        /// </summary>
+        public bool HandleRepeatVariableNames() 
+        {
+            bool changed = false;
+
+            foreach (var id in ParameterNames.Keys.OrderByDescending(i => i.RegNum)) 
+            {
+                int count = ParameterNames.Where(kvp => kvp.Value == ParameterNames[id]).Count();
+                if (count > 1)
+                {
+                    ParameterNames[id] = $"{ParameterNames[id]}_{count}";
+                    changed = true;
+                }
+            }
+
+            //Incredibely ineffcient, I'm just tired.
+            //TODO Improve this to not use so many nested loops
+
+            foreach (var block in BlockList.Reverse()) 
+            {
+                foreach (var id in block.IdentifierNames.Keys.OrderByDescending(i => i.RegNum))
+                {
+                    var name = block.IdentifierNames[id];
+                    int scopeCount = IdentifierNames.Where(kvp => kvp.Value == name).Count();
+                    foreach (var blockIndex in block.DominantBlocks)
+                    {
+                        var domNames = BlockList[(int)blockIndex].IdentifierNames;
+                        scopeCount += domNames.Where(kvp => kvp.Value == name).Count();
+                    }
+
+                    if (scopeCount > 1)
+                    {
+                        block.IdentifierNames[id] = $"{block.IdentifierNames[id]}_{scopeCount}";
+                        changed = true;
+                    }
+                }
+            }
+
+            return changed;
         }
 
         public override string ToString()

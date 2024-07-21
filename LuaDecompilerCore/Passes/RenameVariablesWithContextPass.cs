@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -10,6 +12,10 @@ using LuaDecompilerCore.CFG;
 using LuaDecompilerCore.IR;
 
 namespace LuaDecompilerCore.Passes;
+
+//TODO if a local defined in a scope gets renamed, and then later a local defined in the outer scope gets renamed to the same thing at a later block,
+//it will make a dupe name as the outerscope (rightly) won't take into consideration the inner scope
+//remove handle repeat name in this pass and only use it after
 
 /// <summary>
 /// Rename variables from generic names to usage context based names
@@ -26,12 +32,8 @@ public class RenameVariablesWithContextPass : IPass
 
     public bool RunOnFunction(DecompilationContext decompilationContext, FunctionContext functionContext, Function f)
     {
-        var passInfo = new FunctionRenameVariablesPassInfo(f);
-
         foreach (var block in f.BlockList)
         {
-            passInfo.Block = block;
-
             foreach (var instruction in block.Instructions)
             {
                 if (instruction is Assignment assignment)
@@ -43,7 +45,7 @@ public class RenameVariablesWithContextPass : IPass
                     // local k = b:MemberFunc()
                     if (right is FunctionCall fCall)
                     {
-                        RenameVariablesInFunctionCall(passInfo, fCall, assignment);
+                        RenameVariablesInFunctionCall(f, block, fCall, assignment);
                     }
                     // Goal.Activate = function(...)...
                     // function TuskRider500000_Act45(...)...
@@ -55,55 +57,69 @@ public class RenameVariablesWithContextPass : IPass
                         // function GlobalFunc(x)
                         if (left is IdentifierReference idRef && idRef.Identifier.IsGlobal)
                         {
-                            funcName = GetGlobalName(passInfo, idRef);
+                            funcName = GetGlobalName(f, idRef);
                             global = true;
                         }
 
                         // Goal.TableFunc = function()
                         else if (left is TableAccess tableAccess && tableAccess.Table is IdentifierReference table
-                        && GetGlobalName(passInfo, table) is string tableName && tableName.Equals("Goal") && tableAccess.TableIndex is Constant funcNameConst)
+                        && GetGlobalName(f, table) is string tableName && tableName.Equals("Goal") && tableAccess.TableIndex is Constant funcNameConst)
                         {
                             funcName = funcNameConst.String;
                             global = false;
                         }
 
-                        if (funcName != null && _variableNames.getFuncArgs(funcName, global) is string[] args)
+                        if (funcName != null && _variableNames.GetFuncArgs(funcName, global) is string[] args)
                             SetFunctionArgNames(closure.Function, args);
                     }
                 }
-                else
+                
+                foreach (var expression in instruction.GetExpressions())
                 {
-                    foreach (var expression in instruction.GetExpressions())
+                    if (expression is FunctionCall fCall)
                     {
-                        if (expression is FunctionCall fCall)
-                        {
-                            RenameVariablesInFunctionCall(passInfo, fCall);
-                        }
+                        RenameVariablesInFunctionCall(f, block, fCall);
                     }
                 }
             }
         }
 
+        f.HandleRepeatVariableNames();
+
         return false;
     }
+
+    // Variables often carry less information when they're assigned than when they're used.
+    // For example:
+    //
+    // local random = ai:GetRandam_Int(0, 1)
+    // goal:AddSubGoal(GOAL_COMMON_SidewayMove, 5, TARGET_ENE_0, random, 90, true, true, -1)
+    //
+    // Is less instantly readable than
+    //
+    // local isRight = ai:GetRandam_Int(0, 1)
+    // goal:AddSubGoal(GOAL_COMMON_SidewayMove, 5, TARGET_ENE_0, isRight, 90, true, true, -1)
+    private static int LeftNamePriority = 0;
+    private static int FunctionCalledPriority = 1;
 
     /// <summary>
     /// Renames return and args according to the naming json
     /// </summary>
-    /// <param name="passInfo"></param>
+    /// <param name="func"></param>
+    /// <param name="block"></param>
     /// <param name="fCall"></param>
     /// <param name="assignment"></param>
-    private void RenameVariablesInFunctionCall(FunctionRenameVariablesPassInfo passInfo, FunctionCall fCall, Assignment? assignment = null) 
+    private void RenameVariablesInFunctionCall(Function func, BasicBlock block, FunctionCall fCall, Assignment? assignment = null) 
     {
-        var callFuncName = GetCallFunctionName(passInfo, fCall);
+        var callFuncName = GetCallFunctionName(func, fCall);
         if (callFuncName == null)
             return;
 
         // Check if the call assigns variables
-        if (assignment != null && _variableNames.getCallReturns(callFuncName) is string[] returns)
+        if (assignment != null && _variableNames.GetCallReturns(callFuncName) is string[] returns)
         {
             // Changing return name by arg input context
-            if (_variableNames.getArgsToAppendToReturn(callFuncName) is int[] argsToAppend)
+            if (_variableNames.GetArgsToAppendToReturn(callFuncName) is int[] argsToAppend)
             {
                 StringBuilder append = new StringBuilder();
 
@@ -114,7 +130,7 @@ public class RenameVariablesWithContextPass : IPass
                     if (arg is Constant constant)
                         append.Append(ConstToValidString(constant));
                     else if (arg is IdentifierReference idRef && idRef.Identifier.IsGlobal)
-                        append.Append(_variableNames.translateGlobalForAppending(GetGlobalName(passInfo, idRef) ?? ""));
+                        append.Append(_variableNames.TranslateGlobalForAppending(GetGlobalName(func, idRef) ?? ""));
                     
                 }
 
@@ -124,44 +140,44 @@ public class RenameVariablesWithContextPass : IPass
                     returns[i] = returns[i] + append.ToString();
             }
 
-            SetLeftNames(passInfo, assignment, returns);
+            SetLeftNames(func, block, assignment, returns);
         }
 
-        var args = _variableNames.getCallArgs(callFuncName);
+        var args = _variableNames.GetCallArgs(callFuncName);
         if (args != null)
-            SetCallArgNames(passInfo, fCall, args);
+            SetCallArgNames(func, block, fCall, args);
 
         // Special arg setting for adding goal functions
         if ((callFuncName == "AddSubGoal" || callFuncName == "AddTopGoal" || callFuncName == "AddFrontGoal")
             && fCall.Args.Count > 1 && fCall.Args[1] is IdentifierReference goalIdGlobal)
         {
-            string? goalIdName = GetGlobalName(passInfo, goalIdGlobal);
+            string? goalIdName = GetGlobalName(func, goalIdGlobal);
             if (goalIdName != null)
             {
-                var goalArgs = _variableNames.getGoalArgs(goalIdName);
+                var goalArgs = _variableNames.GetGoalArgs(goalIdName);
                 if (goalArgs != null)
                 {
                     string[] fullArgs = new string[3 + goalArgs.Length];
                     goalArgs.CopyTo(fullArgs, 3);
-                    SetCallArgNames(passInfo, fCall, fullArgs);
+                    SetCallArgNames(func, block, fCall, fullArgs);
                 }
             }
         }
     }
 
     // Returns the name of the function used in the function call
-    private string? GetCallFunctionName(FunctionRenameVariablesPassInfo info, FunctionCall fCall)
+    private string? GetCallFunctionName(Function func, FunctionCall fCall)
     {
         if (fCall.Function is TableAccess tableAccess && tableAccess.TableIndex is Constant funcName)
             return funcName.String;
         if (fCall.Function is IdentifierReference idRef)
-            return GetGlobalName(info, idRef);
+            return GetGlobalName(func, idRef);
 
         return null;
     }
 
     // Set the assigned variable's name. If names[i] is null, name will not be replaced.
-    private void SetLeftNames(FunctionRenameVariablesPassInfo passInfo, Assignment assignment, params string[] names) 
+    private void SetLeftNames(Function func, BasicBlock block, Assignment assignment, params string[] names) 
     {
         for (int i = 0; i < names.Length && i < assignment.LeftList.Count; i++) 
         {
@@ -169,16 +185,12 @@ public class RenameVariablesWithContextPass : IPass
             if (name == null) continue;
 
             var id = assignment.LeftList[i].RegisterBase;
-
-            if (passInfo.Function.IsVariableContextRenamed(id, passInfo.Block)) continue;
-
-            name = HandleRepeatName(passInfo, name);
-            passInfo.Function.SetIdentifierName(id, passInfo.Block, name);
+            func.SetIdentifierName(id, block, name, LeftNamePriority);
         }
     }
 
     // Set the names of arguments of a function call. If names[i] is null, name will not be replaced.
-    private void SetCallArgNames(FunctionRenameVariablesPassInfo passInfo, FunctionCall funcCall, params string[] names)
+    private void SetCallArgNames(Function func, BasicBlock block, FunctionCall funcCall, params string[] names)
     {
         for (int i = 0; i < names.Length && i < funcCall.Args.Count; i++)
         {
@@ -189,11 +201,7 @@ public class RenameVariablesWithContextPass : IPass
             if (arg is IdentifierReference ir && !ir.Identifier.IsGlobal)
             {
                 var id = Identifier.GetRegister(ir.Identifier.RegNum); //needed for renamed identifiers
-
-                if (passInfo.Function.IsVariableContextRenamed(id, passInfo.Block)) continue;
-
-                name = HandleRepeatName(passInfo, name);
-                passInfo.Function.SetIdentifierName(id, passInfo.Block, name);
+                func.SetIdentifierName(id, block, name, FunctionCalledPriority);
             }
         }
     }
@@ -206,25 +214,24 @@ public class RenameVariablesWithContextPass : IPass
         }
     }
 
-    private static string? GetGlobalName(FunctionRenameVariablesPassInfo info, IdentifierReference idRef) 
+    private static string? GetGlobalName(Function func, IdentifierReference idRef) 
     {
         if (idRef.Identifier.IsGlobal)
-            return info.Function.Constants[idRef.Identifier.ConstantId].StringValue;
+            return func.Constants[idRef.Identifier.ConstantId].StringValue;
 
         return null;
     }
 
     // If name is already used increase counter and return a unique name.
     // Naive costly impl
-    private static string HandleRepeatName(FunctionRenameVariablesPassInfo passInfo, string name) 
+    private static string HandleRepeatName(Function func, BasicBlock? block, string name) 
     {
-        var originalName = name;
-        var newName = originalName;
+        var newName = name;
         int occurances = 1;
-        while (passInfo.Function.HasIdentifierNameInScope(passInfo.Block, newName))
+        while (func.HasIdentifierNameInScope(block, newName))
         {
             occurances++;
-            newName = originalName + "_" + occurances;
+            newName = name + "_" + occurances;
         }
 
         return newName;
@@ -254,17 +261,5 @@ public class RenameVariablesWithContextPass : IPass
             Constant.ConstantType.ConstNil => "nil",
             _ => ""
         } ;
-    }
-}
-
-public class FunctionRenameVariablesPassInfo 
-{
-    public Function Function { get; set; }
-
-    public BasicBlock? Block { get; set; } = null;
-
-    public FunctionRenameVariablesPassInfo(Function func) 
-    {
-        Function = func;
     }
 }

@@ -190,6 +190,10 @@
       [
         "ai",
         "distTarget"
+      ],
+      "argsToAppendToReturn":
+      [
+        1
       ]
     },
     "GetDistXZ":
@@ -1408,6 +1412,18 @@
         "ai",
         "goal",
         "effect"
+      ]
+    },
+    "SelectOddsIndex":
+    {
+      "return":
+      [
+        "selectedIndex"
+      ],
+      "args":
+      [
+        "ai",
+        "weightArray"
       ]
     }
   },

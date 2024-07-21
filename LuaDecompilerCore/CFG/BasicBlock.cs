@@ -33,7 +33,15 @@ namespace LuaDecompilerCore.CFG
         public HashSet<Identifier> UpwardExposed;
         public HashSet<Identifier> LiveOut;
 
+        /// <summary>
+        /// Identifier names for locals defined in this block.
+        /// </summary>
         public Dictionary<Identifier, string> IdentifierNames = new();
+
+        /// <summary>
+        /// Priority of the current identifier name, higher priority name replaces lower priority.
+        /// </summary>
+        public Dictionary<Identifier, int> IdentifierNamePriorities = new();
 
         /// <summary>
         /// All identifiers defined as locals in this block
@@ -407,11 +415,16 @@ namespace LuaDecompilerCore.CFG
             return null;
         }
 
-        public void SetLocalName(Identifier identifier, Function func, string name)
+        public void SetLocalName(Identifier identifier, Function func, string name, int priority = 0)
         {
             if (LocalsDefined.Contains(identifier))
             {
-                IdentifierNames[identifier] = name;
+                if (!IdentifierNamePriorities.ContainsKey(identifier) || priority > IdentifierNamePriorities[identifier])
+                {
+                    IdentifierNames[identifier] = name;
+                    IdentifierNamePriorities[identifier] = priority;
+                }
+
                 return;
             }
 
@@ -420,7 +433,12 @@ namespace LuaDecompilerCore.CFG
                 var block = func.BlockList[(int)blockIndex];
                 if (block.LocalsDefined.Contains(identifier))
                 {
-                    block.IdentifierNames[identifier] = name;
+                    if (!block.IdentifierNamePriorities.ContainsKey(identifier) || priority > block.IdentifierNamePriorities[identifier])
+                    {
+                        block.IdentifierNames[identifier] = name;
+                        block.IdentifierNamePriorities[identifier] = priority;
+                    }
+
                     return;
                 }
             }
