@@ -80,7 +80,9 @@ namespace LuaDecompilerCore.IR
         /// </summary>
         public readonly List<Identifier> UpValueBindings = new();
 
-        public readonly Dictionary<Identifier, string> IdentifierNames = new();
+        public readonly Dictionary<Identifier, string> GenericNames = new();
+
+        public readonly Dictionary<Identifier, string> DebugNames = new();
 
         public readonly Dictionary<Identifier, string> ParameterNames = new();
         
@@ -402,12 +404,15 @@ namespace LuaDecompilerCore.IR
             if (!identifier.IsRegister)
                 return null;
 
+            if (DebugNames.ContainsKey(identifier))
+                return DebugNames[identifier];
+
             // Is parameter
             if (identifier.RegNum < ParameterCount)
             {
                 var result = ParameterNames.TryGetValue(identifier, out var n) ? n : null;
                 if (result == null && allowGenericRenames)
-                    result = IdentifierNames.TryGetValue(identifier, out var name) ? name : null;
+                    result = GenericNames.TryGetValue(identifier, out var name) ? name : null;
 
                 return result;
             }
@@ -417,7 +422,7 @@ namespace LuaDecompilerCore.IR
             {
                 var result = block.GetLocalName(identifier, this);
                 if (result == null && allowGenericRenames)
-                    result = IdentifierNames.TryGetValue(identifier, out var n) ? n : null;
+                    result = GenericNames.TryGetValue(identifier, out var n) ? n : null;
 
                 return result;
             }
@@ -474,7 +479,7 @@ namespace LuaDecompilerCore.IR
                 foreach (var id in block.IdentifierNames.Keys.OrderByDescending(i => i.RegNum))
                 {
                     var name = block.IdentifierNames[id];
-                    int scopeCount = IdentifierNames.Where(kvp => kvp.Value == name).Count();
+                    int scopeCount = GenericNames.Where(kvp => kvp.Value == name).Count();
                     foreach (var blockIndex in block.DominantBlocks)
                     {
                         var domNames = BlockList[(int)blockIndex].IdentifierNames;

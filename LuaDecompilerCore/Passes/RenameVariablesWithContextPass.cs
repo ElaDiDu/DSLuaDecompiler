@@ -201,7 +201,7 @@ public class RenameVariablesWithContextPass : IPass
             var arg = funcCall.Args[i];
             if (arg is IdentifierReference ir && !ir.Identifier.IsGlobal)
             {
-                var id = Identifier.GetRegister(ir.Identifier.RegNum); //needed for renamed identifiers
+                var id = Identifier.GetRegister(ir.Identifier.RegNum); // needed for renamed identifiers
                 func.SetIdentifierName(id, block, name, FunctionCalledPriority);
             }
         }

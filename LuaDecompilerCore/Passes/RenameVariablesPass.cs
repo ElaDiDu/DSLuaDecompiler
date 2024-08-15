@@ -21,11 +21,11 @@ public class RenameVariablesPass : IPass
             renamed.Add(identifier);
             if (f.ArgumentNames != null && f.ArgumentNames.Count > i && f.ArgumentNames[i].Name is { } n)
             {
-                f.IdentifierNames[identifier] = n;
+                f.DebugNames[identifier] = n;
             }
             else
             {
-                f.IdentifierNames[identifier] = $"f{f.FunctionId}_arg{i}";
+                f.GenericNames[identifier] = $"f{f.FunctionId}_arg{i}";
             }
         }
         
@@ -49,11 +49,11 @@ public class RenameVariablesPass : IPass
                             if (a.LocalAssignments != null && ll < a.LocalAssignments.Count &&
                                 a.LocalAssignments[ll].Name is { } n)
                             {
-                                f.IdentifierNames[ir.Identifier] = n;
+                                f.DebugNames[ir.Identifier] = n;
                             }
                             else
                             {
-                                f.IdentifierNames[ir.Identifier] = $"f{f.FunctionId}_local{localCounter}";
+                                f.GenericNames[ir.Identifier] = $"f{f.FunctionId}_local{localCounter}";
                                 localCounter++;
                             }
                         }
