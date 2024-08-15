@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using LuaDecompilerCore.Analyzers;
 using LuaDecompilerCore.Annotations;
 using LuaDecompilerCore.CFG;
@@ -238,16 +239,11 @@ public class RenameVariablesWithContextPass : IPass
     }
 
     // Slow
-    private static string[] IllegalSubstrings = { " ", "\\", "/", "?", ".", "\n", "\t", ",", "\"", "\'", "-" };
+    private static Regex IllegalChars = new Regex(@"[ \\\/\?\.\,\""\'\^\&\*\$\%\@\#\!\{\}]");
 
     private static string ValidateStringForLuaVar(string str) 
     {
-        foreach (var illegal in IllegalSubstrings) 
-        {
-            str = str.Replace(illegal, null);
-        }
-
-        return str;
+        return IllegalChars.Replace(str, "");
     }
 
     private static string ConstToValidString(Constant c) 
@@ -256,7 +252,7 @@ public class RenameVariablesWithContextPass : IPass
         {
             Constant.ConstantType.ConstNumber => c.Number.ToString().Replace('.', '_'),
             Constant.ConstantType.ConstInteger => c.Integer.ToString(),
-            Constant.ConstantType.ConstString => ValidateStringForLuaVar(c.String),
+            //Constant.ConstantType.ConstString => ValidateStringForLuaVar(c.String),
             Constant.ConstantType.ConstBool => c.Boolean.ToString(),
             Constant.ConstantType.ConstNil => "nil",
             _ => ""

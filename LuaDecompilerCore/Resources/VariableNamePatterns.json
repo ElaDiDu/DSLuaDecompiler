@@ -403,22 +403,6 @@
         1
       ]
     },
-    "GetStringIndexedNumber":
-    {
-      "return":
-      [
-        "num_"
-      ],
-      "args":
-      [
-        "ai",
-        "numberName"
-      ],
-      "argsToAppendToReturn":
-      [
-        1
-      ]
-    },
     "GetMapHitRadius":
     {
       "return":
@@ -1431,33 +1415,33 @@
   {
     "GOAL_COMMON_Stay":
     [
-      "reactEnemyDistance",
+      "enemyReactDist",
       "turnTarget"
     ],
     "GOAL_COMMON_WalkAround":
     [
       "movingCircleRadius",
       "walk",
-      "reactEnemyDistance",
+      "enemyReactDist",
       "isWalkAroundFreePoint"
     ],
     "GOAL_COMMON_BackToHome":
     [
-      "reactEnemyDistance",
-      "forceBattleGoalWhenDamaged",
+      "enemyReactDist",
+      "forceBattleGoalOnHit",
       null,
       null,
       "moveTarget"
     ],
     "GOAL_COMMON_NonBattleAct":
     [
-      "reactEnemyDistance",
-      "reactToEnemies",
+      "enemyReactDist",
+      "reactToEnemy",
       "run",
       "turnTarget",
-      "stopDistance",
-      "standbyGoal",
-      "forceBattleGoalWhenDamaged"
+      "homeStopDist",
+      "standbyGoalId",
+      "forceBattleGoalOnHit"
     ],
     "GOAL_COMMON_If":
     [
@@ -1470,16 +1454,16 @@
     "GOAL_COMMON_Turn":
     [
       "turnTarget",
-      "withinAngle",
+      "stopAngleWidth",
       "guardStateId",
-      "guardEndType",
+      "onGuardResult",
       "guardSuccessOnEnd"
     ],
     "GOAL_COMMON_TurnAround":
     [
-      "turnTarget",
-      "dirType",
-      "angleWidth",
+      "moveTarget",
+      "directionStart",
+      "stopAngleWidth",
       "walk",
       "successOnEnd",
       "guardStateId"
@@ -1492,8 +1476,8 @@
     "GOAL_COMMON_MoveToSomewhereSmooth":
     [
       "moveTarget",
-      "orientationFromTarget",
-      "stopDistance",
+      "directionFromTarget",
+      "stopDist",
       "turnTarget",
       "walk",
       "directionalDistance"
@@ -1505,82 +1489,82 @@
       "turnTarget",
       "walk",
       "guardStateId",
-      "guardEndType",
+      "onGuardResult",
       "guardSuccessOnEnd"
     ],
     "GOAL_COMMON_ApproachTarget":
     [
       "moveTarget",
-      "stopDistance",
+      "stopDist",
       "turnTarget",
       "walk",
       "guardStateId",
-      "guardEndType",
+      "onGuardResult",
       "guardSuccessOnEnd",
       "xzDistanceOnly"
     ],
     "GOAL_COMMON_LeaveTarget":
     [
       "moveTarget",
-      "stopDistance",
+      "stopDist",
       "turnTarget",
       "walk",
       "guardStateId",
-      "guardEndType",
+      "onGuardResult",
       "guardSuccessOnEnd"
     ],
     "GOAL_COMMON_SidewayMove":
     [
       "moveTarget",
-      "isRight",
-      "stopAngle",
+      "right",
+      "angleThreshold",
       "isWalk",
       "successOnEnd",
       "guardStateId",
-      "guardEndType"
+      "onGuardResult"
     ],
     "GOAL_COMMON_SidewayMoveAngle":
     [
       "moveTarget",
-      "isRight",
-      "stopAngle",
+      "moveAngle",
+      "angleThreshold",
       "walk",
       "successOnEnd",
       "guardStateId",
-      "guardEndType"
+      "onGuardResult"
     ],
     "GOAL_COMMON_SidewayMoveAvoidChr":
     [
       "moveTarget",
-      "isRight",
-      "stopAngle",
+      "right",
+      "angleThreshold",
       "walk",
       "successOnEnd",
       "guardStateId",
-      "guardEndType"
+      "onGuardResult"
     ],
     "GOAL_COMMON_KeepDist":
     [
       "moveTarget",
-      "minDistance",
-      "maxDistance",
+      "minDist",
+      "maxDist",
       "turnTarget",
       "walk",
       "guardStateId",
-      "guardEndType",
+      "onGuardResult",
       "guardSuccessOnEnd"
     ],
     "GOAL_COMMON_MoveToSomewhere":
     [
       "moveTarget",
-      "orientationFromTarget",
-      "stopDistance",
+      "directionFromTarget",
+      "stopDist",
       "turnTarget",
       "walk",
       "directionalDistance",
       null,
       "xzDistanceOnly",
-      "useDefaultOrieDist",
+      "useDefaultArgs",
       "closeProximityMode"
     ],
     "GOAL_COMMON_SpinStep":
@@ -1588,12 +1572,12 @@
       "animationId",
       "target",
       "turnTime",
-      "stepDirection",
-      "safetyDistance"
+      "dirSpaceCheck",
+      "distSpaceCheck"
     ],
     "GOAL_COMMON_Fall":
     [
-      "target",
+      "stopTarget",
       "startEzStateId",
       "stopEzStateId",
       "fallMarginMeters"
@@ -1601,25 +1585,27 @@
     "GOAL_COMMON_MoveToMovePointAir":
     [
       "moveTarget",
-      "directionFromTargetFront"
+      null,
+      "directionFromTarget"
     ],
     "GOAL_COMMON_MoveTargetRelationPos":
     [
-      "targetPos",
-      null,
-      "stopDistance",
+      "moveTarget",
+      "directionFromTarget",
+      "stopDist",
       "turnTarget",
-      null,
-      "directionalDistance"
+      "walk",
+      "directionalDistance",
+      "interceptAngle"
     ],
     "GOAL_COMMON_MoveFollowPathSpecifyPos":
     [
       "moveTargetAlmostUnused",
-      null,
-      "stopDistance",
+      "directionFromTarget",
+      "stopDist",
       "turnTarget",
-      null,
-      null,
+      "walk",
+      "directionalDistance",
       "x",
       "y",
       "z"
@@ -1627,37 +1613,37 @@
     "GOAL_COMMON_MoveToSomewhere_RouteMove":
     [
       "moveTarget",
-      "orientationFromTarget",
-      "stopDistance",
+      "directionFromTarget",
+      "stopDist",
       "turnTarget",
       "walk",
       "directionalDistance",
       "xzDistanceOnly",
-      "useDefaultOrieDist",
+      "useDefaultArgs",
       "closeProximityMode"
     ],
     "GOAL_COMMON_MoveToSomewhere_SwitchRouteMove":
     [
       "turnTarget",
       "walk",
-      null,
-      "isAIsStandardPoints"
+      "directionalDistance",
+      "forceAndForgoCalculations"
     ],
     "GOAL_COMMON_MoveToSomewhere_SpecifyMove":
     [
       "turnTarget",
       "walk",
       null,
-      "specificPointIndex"
+      "pointIndex"
     ],
     "GOAL_COMMON_MoveGetwellSpace":
     [
-      "backPriority",
+      "leavePriority",
       "leftPriority",
       "rightPriority",
       "turnTarget",
-      "safetyDistance",
-      "successOnCantMove"
+      "distSpaceCheck",
+      "leaveStopDist"
     ],
     "GOAL_COMMON_ExecAction":
     [
@@ -1667,66 +1653,66 @@
     [
       "action",
       "moveTarget",
-      "orientationFromTarget",
-      "stopDistance",
+      "directionFromTarget",
+      "stopDist",
       "turnTarget",
       "directionalDistance"
     ],
     "GOAL_COMMON_ToTargetWarp":
     [
       "warpTarget",
-      "orientationFromTarget",
+      "directionFromTarget",
       "distanceFromTarget",
       "turnTarget",
-      "minHeightOffset",
-      "maxHeightOffset",
-      "warpExecMinDist"
+      "lowHeightOffset",
+      "highHeightOffset",
+      "warpPosMinDist"
     ],
     "GOAL_COMMON_ApproachTargetAllDirection":
     [
       "moveTarget",
-      "stopDistance",
+      "stopDist",
       "turnTarget",
       "walk",
       "guardStateId",
-      "guardEndType",
+      "onGuardResult",
       "guardSuccessOnEnd",
       "xzDistanceOnly"
     ],
     "GOAL_COMMON_SideWay_On_FailedPath":
     [
       "pathCheckInterval",
-      "animationIdMidAction",
-      "midActionLife",
-      "midActionInterval",
+      "giveupAction",
+      "giveupAttackLife",
+      "giveupAttackCooldown",
       "giveUpTime",
       "isGuard",
-      "isReturnLimitTime"
+      "determineSuccessOnHome"
     ],
     "GOAL_COMMON_ApproachTarget_ParallelMov":
     [
       "moveTarget",
-      "stopDistance",
+      "stopDist",
       "turnTarget",
       "walk",
       "guardStateId",
-      "guardEndType",
+      "onGuardResult",
       "guardSuccessOnEnd"
     ],
     "GOAL_COMMON_FlexibleSideWayMove":
     [
       "leftPriority",
       "rightPriority",
-      "target",
-      "safetyDistance",
-      "stopAngle",
+      "moveTarget",
+      "distSpaceCheck",
+      "angleThreshold",
       "guardOdds",
-      "minDistance",
-      "maxDistance"
+      "minDist",
+      "maxDist"
     ],
     "GOAL_COMMON_MoveToMultiPoint":
     [
-      "stopDistance",
+      "stopDist",
       "turnTarget",
       "walk",
       "point1",
@@ -1744,40 +1730,40 @@
     [
       "referenceTarget",
       "turnTarget",
-      "stopDistance",
-      "maxAllowedAngle",
-      "intervalsOfAngle",
+      "wantDist",
+      "angleWidth",
+      "intervalOfAngles",
       "runOdds",
       "guardOdds",
-      "stopDistance"
+      "stopDist"
     ],
     "GOAL_COMMON_SideWay_For_Fear_Of_Fire":
     [
-      "stopDistance",
+      "stopDist",
       "guardStateId",
       "canGoSideways"
     ],
     "GOAL_COMMON_ApproachTarget_OnUnfavorableAttack":
     [
       "moveTarget",
-      "stopDistance",
+      "stopDist",
       "turnTarget",
       "walk",
       "guardStateId",
-      "guardEndType",
+      "onGuardResult",
       "guardSuccessOnEnd",
       "xzDistanceOnly"
     ],
     "GOAL_COMMON_ApproachForBuddy":
     [
-      "trackTarget",
-      "stopDistanceForRelativePos",
+      "moveTarget",
+      "stopDistToRelativePos",
       "turnTarget",
       "walk",
       "guardStateId",
-      "angleStartToRelativePos",
-      "angleWidth",
-      "distanceToRelativePos"
+      "searchAngleStart",
+      "searchAngleWidth",
+      "needsApproachDist"
     ],
     "GOAL_COMMON_SideWay_On_FailedPath_WhiteGhost":
     [
@@ -1786,36 +1772,46 @@
     "GOAL_COMMON_Landing":
     [
       "moveTarget",
-      "stopDistance"
+      "stopDist"
     ],
     "GOAL_COMMON_Landing_Move":
     [
-      "stopDistance"
+      "stopDist"
     ],
     "GOAL_COMMON_ComeDown":
     [
-      "stopDistance"
+      "stopDist"
     ],
     "GOAL_COMMON_KeepDistYAxis":
     [
-      "distanceTarget",
-      "minDistance",
-      "maxDistance",
+      "moveTarget",
+      "minDist",
+      "maxDist",
       "turnTarget"
     ],
     "GOAL_COMMON_ApproachSettingDirection":
     [
       "moveTarget",
-      "stopDistance",
+      "stopDist",
       "turnTarget",
       "walk",
       "guardStateId",
-      "orientationFromTarget",
+      "directionFromTarget",
+      "directionalDistance"
+    ],
+    "GOAL_COMMON_ApproachAround":
+    [
+      "moveTarget",
+      "stopDist",
+      "turnTarget",
+      "walk",
+      "guardStateId",
+      "directionFromTarget",
       "directionalDistance"
     ],
     "GOAL_COMMON_AIJump":
     [
-      "target"
+      "jumpTarget"
     ],
     "GOAL_COMMON_FadeWarpToInitPos":
     [
@@ -1824,68 +1820,68 @@
     ],
     "GOAL_COMMON_WalkAround_Anywhere":
     [
-      "stopDistance",
+      "stopDist",
       "moveLife",
       "walk",
       "lookAroundAnimId",
       "lookAroundLife",
       "lookAroundAmount",
-      "isLookAroundBeforeMove",
+      "lookAroundBeforeMove",
       "resetMovementPoints",
-      "isWaitWithLookAround"
+      "waitWithLookAround"
     ],
     "GOAL_COMMON_Attack":
     [
       "animationId",
       "target",
       "successDistance",
-      "angleUp",
-      "angleDown"
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_Guard":
     [
       "guardStateId",
       "turnTarget",
-      "successfulGuardResult",
-      "endAfterBlock"
+      "onGuardResult",
+      "guardSuccessOnEnd"
     ],
     "GOAL_COMMON_ComboAttack":
     [
       "animationId",
       "target",
-      "successDistance",
-      "angleUp",
-      "angleDown",
+      "successDist",
+      "upAngleThreshold",
+      "downAngleThreshold",
       "successAngle"
     ],
     "GOAL_COMMON_GuardBreakAttack":
     [
       "animationId",
       "target",
-      "successDistance",
-      "angleUp",
-      "angleDown"
+      "successDist",
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_NonspinningAttack":
     [
       "animationId",
       "target",
-      "successDistance",
-      "angleUp",
-      "angleDown"
+      "successDist",
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_ContinueAttack":
     [
       "animationId",
       "target",
-      "successDistance",
+      "constantSuccessDist",
       "successOnHit"
     ],
     "GOAL_COMMON_ApproachStep":
     [
       "animationId",
       "target",
-      "stopDistance"
+      "stopDist"
     ],
     "GOAL_COMMON_UseItem":
     [
@@ -1894,7 +1890,7 @@
     "GOAL_COMMON_DashAttack":
     [
       "target",
-      "stopDistance",
+      "stopDist",
       "animationId",
       "guardStateId"
     ],
@@ -1903,25 +1899,34 @@
       "target",
       "animationId"
     ],
+    "DashTarget":
+    [
+      "moveTarget",
+      "stopDist",
+      "turnTarget",
+      "guardStateId",
+      "onGuardResult",
+      "guardSuccessOnEnd"
+    ],
     "GOAL_COMMON_NPCStepAttack":
     [
-      null,
-      "r1AttackRange",
-      "r2AttackRange",
-      "ifBothR1Odds",
-      "isR1DualWield"
+      "target",
+      "lightAttackRange",
+      "heavyAttackRange",
+      "lightOdds",
+      "isLightDualWield"
     ],
     "GOAL_COMMON_Parry":
     [
       "animationId",
       "target",
-      "successDistance"
+      "successDist"
     ],
     "GOAL_COMMON_SpecialTurn":
     [
       "animationId",
       "target",
-      "turningAngle"
+      "stopAngleWidth"
     ],
     "GOAL_COMMON_TeamCallHelp":
     [
@@ -1932,160 +1937,160 @@
       "animationId1",
       "animationId2",
       "target",
-      "successDistance",
-      "meshCheckDir1",
-      "meshCheckDir2",
-      "comboStage",
-      "meshCheckDist",
+      "successDist",
+      "spaceCheckDir1",
+      "spaceCheckDir2",
+      "comboLength",
+      "spaceCheckDist",
       "turnTime",
       "turnFaceAngle",
-      "angleUp",
-      "angleDown"
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_NpcStanceAttack_WithMove":
     [
       "target",
       "stanceStartButton",
-      "meshCheckDist",
+      "spaceCheckDist",
       "turnTime",
       "turnFaceAngle",
-      "upAngle",
-      "downAngle"
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_CommonAttack":
     [
       "animationId",
       "target",
-      "successDistance",
+      "successDist",
       "successAngle",
       "turnTime",
       "turnFaceAngle",
-      "isComboAttack",
-      "isMoveCancel",
-      "isGuardBreakAttack",
-      "isTurn",
-      "angleUp",
-      "angleDown",
-      "isCancelAttack"
+      "comboAttack",
+      "moveCancel",
+      "guardBreakAttack",
+      "noTurn",
+      "upAngleThreshold",
+      "downAngleThreshold",
+      "attackCancel"
     ],
     "GOAL_COMMON_ComboRepeat":
     [
       "animationId",
       "target",
-      "successDistance",
-      "upAngle",
-      "downAngle"
+      "successDist",
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_ComboFinal":
     [
       "animationId",
       "target",
-      "successDistance",
-      "upAngle",
-      "downAngle"
+      "successDist",
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_AttackTunableSpin":
     [
       "animationId",
       "target",
-      "successDistance",
+      "successDist",
       "turnTime",
       "turnFaceAngle",
-      "upAngle",
-      "downAngle"
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_ComboAttackTunableSpin":
     [
       "animationId",
       "target",
-      "successDistance",
+      "successDist",
       "turnTime",
       "turnFaceAngle",
-      "upAngle",
-      "downAngle"
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_ComboAttack_SuccessAngle180":
     [
       "animationId",
       "target",
-      "successDistance",
-      "upAngle",
-      "downAngle"
+      "successDist",
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_ComboRepeat_SuccessAngle180":
     [
       "animationId",
       "target",
-      "successDistance",
-      "upAngle",
-      "downAngle"
+      "successDist",
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_Pursuit":
     [
       "animationId",
       "target",
-      "successDistance",
-      "upAngle",
-      "downAngle"
+      "successDist",
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_NonspinningComboAttack":
     [
       "animationId",
       "target",
-      "successDistance",
-      "upAngle",
-      "downAngle"
+      "successDist",
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_NonspinningComboRepeat":
     [
       "animationId",
       "target",
-      "successDistance",
-      "upAngle",
-      "downAngle"
+      "successDist",
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_NonspinningComboFinal":
     [
       "animationId",
       "target",
-      "successDistance",
-      "upAngle",
-      "downAngle"
+      "successDist",
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_ComboTunable_SuccessAngle180":
     [
       "animationId",
       "target",
-      "successDistance",
+      "successDist",
       "turnTime",
       "turnFaceAngle",
-      "upAngle",
-      "downAngle"
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_GuardBreakTunable":
     [
       "animationId",
       "target",
-      "successDistance",
+      "successDist",
       "turnTime",
       "turnFaceAngle",
-      "upAngle",
-      "downAngle"
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_AttackNonCancel":
     [
       "animationId",
       "target",
-      "successDistance",
+      "successDist",
       "turnTime",
       "turnFaceAngle",
-      "upAngle",
-      "downAngle"
+      "upAngleThreshold",
+      "downAngleThreshold"
     ],
     "GOAL_COMMON_CautionStateApproachTarget_WalkAround":
     [
-      "isWalkAroundFreePoint",
-      "minGoalTime",
+      "isExecAction",
+      "minGoalTimeFrames",
       "walk"
     ],
     "GOAL_COMMON_CautionStateApproachTarget_WAEA":
@@ -2094,8 +2099,8 @@
     ],
     "GOAL_COMMON_TargetStateBehavior":
     [
-      "targetState",
-      "goalIdOrAction"
+      "behaviorType",
+      "goalOrAction"
     ],
     "GOAL_COMMON_WeaponChange":
     [
@@ -2108,9 +2113,9 @@
       "leftPriority",
       "rightPriority",
       "target",
-      "safetyDistance",
+      "distSpaceCheck",
       "turnTime",
-      "isAlwaysSuccess"
+      "alwaysSuccess"
     ],
     "GOAL_COMMON_Wait_On_FailedPath":
     [
@@ -2120,10 +2125,10 @@
     [
       "pathCheckInterval",
       "moveTarget",
-      "moveTarget",
-      "stopDistance",
+      "stopDist",
       "turnTarget",
-      "walk"
+      "walk",
+      "guardStateId"
     ],
     "GOAL_COMMON_WalkAround_On_FailedPath":
     [
@@ -2132,18 +2137,18 @@
     "GOAL_COMMON_BackToHome_On_FailedPath":
     [
       "pathCheckInterval",
-      "reactEnemyDistance"
+      "enemyReactDist"
     ],
     "GOAL_COMMON_Guard_On_FailedPath":
     [
       "pathCheckInterval",
       "giveUpTime",
       "guardStateId",
-      "isReturnLimitTime"
+      "determineSuccessOnHome"
     ],
     "GOAL_COMMON_MoveToWaitandSee":
     [
-      "stopDistance",
+      "stopDist",
       "turnTarget",
       "walk",
       "pathCheckInterval",
@@ -2159,69 +2164,69 @@
     "GOAL_COMMON_ContinueKeepDist":
     [
       "target",
-      "minDistance",
-      "maxDistance",
+      "minDist",
+      "maxDist",
       null,
       "closeGuardOdds",
       "farGuardOdds"
     ],
     "GOAL_COMMON_GuardBreakCombo":
     [
-      "attackIdStart",
-      "attackIdFinal",
+      "animationIdGuardBreak",
+      "animationIdFollowup",
       "target",
-      "successDistanceFinalAttack",
+      "successDistFollowup",
       "turnTime",
       "turnFaceAngle"
     ],
     "GOAL_COMMON_Mount":
     [
-      "stopDistance",
+      "stopDist",
       "cantRideCooldown"
     ],
     "GOAL_COMMON_SetTimerRealtime":
     [
-      "index",
+      "timerIndex",
       "value"
     ],
     "GOAL_COMMON_SetNumberRealtime":
     [
-      "index",
+      "numberIndex",
       "value"
     ],
     "GOAL_COMMON_Fall_Asleep":
     [
-      "isForcedSleep"
+      "forceSleep"
     ],
     "GOAL_COMMON_LeaveTargetToPathEnd":
     [
       "moveTarget",
-      "stopDistance",
+      "stopDist",
       "turnTarget",
       "walk",
       "guardStateId",
-      "guardEndType",
+      "onGuardResult",
       "guardSuccessOnEnd",
-      "spaceCheckDistance"
+      "distSpaceCheck"
     ],
     "GOAL_COMMON_LeaveTarget_Continuous":
     [
       "moveTarget",
-      "stopDistance",
+      "stopDist",
       "turnTarget",
       "walk",
       "guardStateId",
-      "guardEndType",
+      "onGuardResult",
       "guardSuccessOnEnd",
-      "spaceCheckDistance"
+      "distSpaceCheck"
     ],
     "GOAL_COMMON_LeaveTarget_Escape":
     [
       "moveTarget",
-      "stopDistance",
+      "stopDist",
       "turnTarget",
       "walk",
-      "fixedPointStopDistance"
+      "stopDistPathPoint"
     ],
     "GOAL_COMMON_ErrorNotification":
     [
