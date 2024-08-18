@@ -133,7 +133,7 @@ public class Lua50Decompiler : ILanguageDecompiler
         // Register closures for all the children
         foreach (var t in function.ChildFunctions)
         {
-            var childFunction = new Function(t.FunctionId)
+            var childFunction = new Function(t.FunctionId, irFunction)
             {
                 // UpValue count needs to be set for child functions for analysis to be correct
                 UpValueCount = t.NumUpValues
@@ -828,6 +828,7 @@ public class Lua50Decompiler : ILanguageDecompiler
         passManager.AddPass("parenthesize", new ParenthesizePass());
         passManager.AddPass("setup-local-naming-structure", new SetupLocalNamingStructurePass());
         passManager.AddPass("rename-identifiers-by-context", new RenameVariablesWithContextPass());
+        passManager.AddPass("handle-repeat-varaible-names", new HandleRepeatVariableNamesPass());
 
 
         passManager.AddPass("build-ast", new AstTransformPass());

@@ -54,6 +54,11 @@ namespace LuaDecompilerCore.CFG
         public List<uint> DominantBlocks = new();
 
         /// <summary>
+        /// All blocks this block immediately dominates in parent function. For printing local names, filled out on a late pass
+        /// </summary>
+        public List<uint> DominatesImmediate = new();
+
+        /// <summary>
         /// Register IDs of registers killed (i.e. redefined) under the scope of this block (excluding this block)
         /// </summary>
         public HashSet<uint> ScopeKilled = new();
@@ -401,9 +406,9 @@ namespace LuaDecompilerCore.CFG
             if (IdentifierNames.ContainsKey(identifier))
                 return IdentifierNames[identifier];
 
-            // Search dominant blocks
             if (func != null) 
             {
+                // Search dominant blocks
                 foreach (var blockIndex in DominantBlocks) 
                 {    
                     var name = func.BlockList[(int)blockIndex].IdentifierNames.TryGetValue(identifier, out var n) ? n : null;

@@ -14,10 +14,7 @@ using LuaDecompilerCore.IR;
 
 namespace LuaDecompilerCore.Passes;
 
-//TODO if a local defined in a scope gets renamed, and then later a local defined in the outer scope gets renamed to the same thing at a later block,
-//it will make a dupe name as the outerscope (rightly) won't take into consideration the inner scope
-//remove handle repeat name in this pass and only use it after
-
+//TODO Handle upvalues with same name as lower value
 /// <summary>
 /// Rename variables from generic names to usage context based names
 /// </summary>
@@ -74,12 +71,14 @@ public class RenameVariablesWithContextPass : IPass
                             SetFunctionArgNames(closure.Function, args);
                     }
                 }
-                
-                foreach (var expression in instruction.GetExpressions())
+                else
                 {
-                    if (expression is FunctionCall fCall)
+                    foreach (var expression in instruction.GetExpressions())
                     {
-                        RenameVariablesInFunctionCall(f, block, fCall);
+                        if (expression is FunctionCall fCall)
+                        {
+                            RenameVariablesInFunctionCall(f, block, fCall);
+                        }
                     }
                 }
             }
@@ -199,10 +198,9 @@ public class RenameVariablesWithContextPass : IPass
             if (name == null) continue;
 
             var arg = funcCall.Args[i];
-            if (arg is IdentifierReference ir && !ir.Identifier.IsGlobal)
+            if (arg is IdentifierReference ir)
             {
-                var id = Identifier.GetRegister(ir.Identifier.RegNum); // needed for renamed identifiers
-                func.SetIdentifierName(id, block, name, FunctionCalledPriority);
+                func.SetIdentifierName(ir.Identifier, block, name, FunctionCalledPriority);
             }
         }
     }
@@ -221,21 +219,6 @@ public class RenameVariablesWithContextPass : IPass
             return func.Constants[idRef.Identifier.ConstantId].StringValue;
 
         return null;
-    }
-
-    // If name is already used increase counter and return a unique name.
-    // Naive costly impl
-    private static string HandleRepeatName(Function func, BasicBlock? block, string name) 
-    {
-        var newName = name;
-        int occurances = 1;
-        while (func.HasIdentifierNameInScope(block, newName))
-        {
-            occurances++;
-            newName = name + "_" + occurances;
-        }
-
-        return newName;
     }
 
     // Slow

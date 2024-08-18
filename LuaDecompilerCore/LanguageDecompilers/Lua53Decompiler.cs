@@ -157,7 +157,7 @@ public class Lua53Decompiler : ILanguageDecompiler
         // Register closures for all the children
         foreach (var t in function.ChildFunctions)
         {
-            var childFunction = new Function(t.FunctionId)
+            var childFunction = new Function(t.FunctionId, irFunction)
             {
                 // UpValue count needs to be set for child functions for analysis to be correct
                 UpValueCount = t.NumUpValues

@@ -20,6 +20,7 @@ namespace LuaDecompilerCore.Passes
             foreach (var block in f.BlockList) 
             {
                 block.DominantBlocks.AddRange(dominance.Dominance(block.BlockIndex).ToArray());
+                block.DominatesImmediate.AddRange(dominance.DominanceTreeSuccessors(block.BlockIndex).ToArray());
 
                 foreach (var instruction in block.Instructions) 
                 {
@@ -32,6 +33,14 @@ namespace LuaDecompilerCore.Passes
                                 block.LocalsDefined.Add(left.RegisterBase);
                             }
                         }
+                    }
+
+                    foreach (var expr in instruction.GetExpressions()) 
+                    {
+                        if (expr is Closure closure) 
+                        {
+                            closure.Function.ParentBlockDefinition = block;
+                        } 
                     }
                 }
             }

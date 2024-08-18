@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Channels;
 using System.Xml.XPath;
 using LuaDecompilerCore.CFG;
 using LuaDecompilerCore.Utilities;
@@ -14,6 +15,8 @@ namespace LuaDecompilerCore.IR
     /// </summary>
     public sealed class Function
     {
+        public Function? Parent { get; }
+
         public List<Function> Closures { get; }
 
         public Dictionary<uint, Label> Labels { get; }
@@ -106,8 +109,14 @@ namespace LuaDecompilerCore.IR
         /// </summary>
         public int UpValueCount = 0;
 
-        public Function(int functionId)
+        /// <summary>
+        /// Which block was this function defined in
+        /// </summary>
+        public BasicBlock? ParentBlockDefinition { get; set; }
+
+        public Function(int functionId, Function? parent = null)
         {
+            Parent = parent;
             Closures = new List<Function>();
             Labels = new Dictionary<uint, Label>();
             _blockList = new List<BasicBlock>();
@@ -401,30 +410,37 @@ namespace LuaDecompilerCore.IR
 
         public string? GetIdentifierName(Identifier identifier, BasicBlock? block, bool allowGenericRenames = true) 
         {
-            if (!identifier.IsRegister)
-                return null;
-
             if (DebugNames.ContainsKey(identifier))
                 return DebugNames[identifier];
 
-            // Is parameter
-            if (identifier.RegNum < ParameterCount)
+            if (identifier.IsRegister)
             {
-                var result = ParameterNames.TryGetValue(identifier, out var n) ? n : null;
-                if (result == null && allowGenericRenames)
-                    result = GenericNames.TryGetValue(identifier, out var name) ? name : null;
+                if (identifier.IsRenamedRegister)
+                    identifier = Identifier.GetRegister(identifier.RegNum);
 
-                return result;
+                // Is parameter
+                if (identifier.RegNum < ParameterCount)
+                {
+                    var result = ParameterNames.TryGetValue(identifier, out var n) ? n : null;
+                    if (result == null && allowGenericRenames)
+                        result = GenericNames.TryGetValue(identifier, out var name) ? name : null;
+
+                    return result;
+                }
+
+                // Attempt local fetch
+                else if (block != null)
+                {
+                    var result = block.GetLocalName(identifier, this);
+                    if (result == null && allowGenericRenames)
+                        result = GenericNames.TryGetValue(identifier, out var n) ? n : null;
+
+                    return result;
+                }
             }
-
-            // Attempt local fetch
-            else if (block != null)
+            else if (identifier.IsUpValue && Parent != null && ParentBlockDefinition != null) 
             {
-                var result = block.GetLocalName(identifier, this);
-                if (result == null && allowGenericRenames)
-                    result = GenericNames.TryGetValue(identifier, out var n) ? n : null;
-
-                return result;
+                return Parent.GetIdentifierName(UpValueBindings[(int)identifier.UpValueNum], ParentBlockDefinition, allowGenericRenames);
             }
 
             return null;
@@ -432,14 +448,21 @@ namespace LuaDecompilerCore.IR
 
         public void SetIdentifierName(Identifier identifier, BasicBlock? block, string name, int priority = 0) 
         {
-            if (!identifier.IsRegister)
-                return;
+            if (identifier.IsRegister)
+            {
+                if (identifier.IsRenamedRegister)
+                    identifier = Identifier.GetRegister(identifier.RegNum);
 
-            // Is parameter
-            if (identifier.RegNum < ParameterCount)
-                ParameterNames[identifier] = name;
-            else if (block != null)
-                block.SetLocalName(identifier, this, name, priority);
+                // Is parameter
+                if (identifier.RegNum < ParameterCount)
+                    ParameterNames[identifier] = name;
+                else if (block != null)
+                    block.SetLocalName(identifier, this, name, priority);
+            }
+            else if (identifier.IsUpValue && Parent != null && ParentBlockDefinition != null)
+            {
+                Parent.SetIdentifierName(UpValueBindings[(int)identifier.UpValueNum], ParentBlockDefinition, name, priority);
+            }
         }
         public bool IsVariableContextRenamed(Identifier identifier, BasicBlock? block) => GetIdentifierName(identifier, block, false) != null;
 
@@ -454,6 +477,7 @@ namespace LuaDecompilerCore.IR
             return false;
         }
 
+        //TODO Handle upvalues!
         /// <summary>
         /// Adjusts repeat variable names with suffixes by order of occurance by scope
         /// </summary>
@@ -488,7 +512,7 @@ namespace LuaDecompilerCore.IR
 
                     if (scopeCount > 1)
                     {
-                        block.IdentifierNames[id] = $"{block.IdentifierNames[id]}_{scopeCount}";
+                        block.IdentifierNames[id] = $"{name}_{scopeCount}";
                         changed = true;
                     }
                 }

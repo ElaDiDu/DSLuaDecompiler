@@ -23,10 +23,8 @@ public class RenameVariablesPass : IPass
             {
                 f.DebugNames[identifier] = n;
             }
-            else
-            {
-                f.GenericNames[identifier] = $"f{f.FunctionId}_arg{i}";
-            }
+            
+            f.GenericNames[identifier] = $"f{f.FunctionId}_arg{i}";
         }
         
         // Rename all the locals
@@ -51,11 +49,9 @@ public class RenameVariablesPass : IPass
                             {
                                 f.DebugNames[ir.Identifier] = n;
                             }
-                            else
-                            {
-                                f.GenericNames[ir.Identifier] = $"f{f.FunctionId}_local{localCounter}";
-                                localCounter++;
-                            }
+                            
+                            f.GenericNames[ir.Identifier] = $"f{f.FunctionId}_local{localCounter}";
+                            localCounter++;
                         }
                         ll++;
                     }
