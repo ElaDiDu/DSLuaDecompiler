@@ -84,8 +84,6 @@ public class RenameVariablesWithContextPass : IPass
             }
         }
 
-        f.HandleRepeatVariableNames();
-
         return false;
     }
 

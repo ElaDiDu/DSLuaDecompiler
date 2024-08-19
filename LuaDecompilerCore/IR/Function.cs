@@ -477,50 +477,6 @@ namespace LuaDecompilerCore.IR
             return false;
         }
 
-        //TODO Handle upvalues!
-        /// <summary>
-        /// Adjusts repeat variable names with suffixes by order of occurance by scope
-        /// </summary>
-        public bool HandleRepeatVariableNames() 
-        {
-            bool changed = false;
-
-            foreach (var id in ParameterNames.Keys.OrderByDescending(i => i.RegNum)) 
-            {
-                int count = ParameterNames.Where(kvp => kvp.Value == ParameterNames[id]).Count();
-                if (count > 1)
-                {
-                    ParameterNames[id] = $"{ParameterNames[id]}_{count}";
-                    changed = true;
-                }
-            }
-
-            //Incredibely ineffcient, I'm just tired.
-            //TODO Improve this to not use so many nested loops
-
-            foreach (var block in BlockList.Reverse()) 
-            {
-                foreach (var id in block.IdentifierNames.Keys.OrderByDescending(i => i.RegNum))
-                {
-                    var name = block.IdentifierNames[id];
-                    int scopeCount = GenericNames.Where(kvp => kvp.Value == name).Count();
-                    foreach (var blockIndex in block.DominantBlocks)
-                    {
-                        var domNames = BlockList[(int)blockIndex].IdentifierNames;
-                        scopeCount += domNames.Where(kvp => kvp.Value == name).Count();
-                    }
-
-                    if (scopeCount > 1)
-                    {
-                        block.IdentifierNames[id] = $"{name}_{scopeCount}";
-                        changed = true;
-                    }
-                }
-            }
-
-            return changed;
-        }
-
         public override string ToString()
         {
             return FunctionPrinter.DebugPrintFunction(this);
