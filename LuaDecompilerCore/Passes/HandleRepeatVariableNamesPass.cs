@@ -17,9 +17,14 @@ namespace LuaDecompilerCore.Passes
         {
             // What's the point of a pass if you only use it on main function?
             if (f.FunctionId == 0)
-                HandleRepeatNames(f, f.BeginBlock, new Dictionary<string, int>(), true);
+                HandleRepeatNames(f);
             
             return false;
+        }
+
+        private static void HandleRepeatNames(Function mainFunc) 
+        {
+            HandleRepeatNames(mainFunc, mainFunc.BeginBlock, new Dictionary<string, int>(), true);
         }
 
         private static void HandleRepeatNames(Function func, BasicBlock block, Dictionary<string, int> nameCount, bool newFunc)
@@ -34,7 +39,14 @@ namespace LuaDecompilerCore.Passes
 
                     if (!nameCount.ContainsKey(name))
                     {
-                        nameCount[name] = 1;
+                        // Make sure no locals are named after existing globals
+                        if (block.GlobalsReferenced.Contains(name))
+                        {
+                            nameCount[name] = 2;
+                            block.IdentifierNames[id] = $"{name}_{nameCount[name]}";
+                        }
+                        else
+                            nameCount[name] = 1;
                     }
                     else
                     {
@@ -44,14 +56,21 @@ namespace LuaDecompilerCore.Passes
                 }
             }
 
-            foreach (var id in block.LocalsDefined)
+            foreach (var id in block.LocalsDefined.OrderBy(i => i.RegNum))
             {
                 block.IdentifierNames.TryGetValue(id, out var name);
                 if (name == null) continue;
 
                 if (!nameCount.ContainsKey(name))
                 {
-                    nameCount[name] = 1;
+                    // Make sure no locals are named after existing globals
+                    if (block.GlobalsReferenced.Contains(name))
+                    {
+                        nameCount[name] = 2;
+                        block.IdentifierNames[id] = $"{name}_{nameCount[name]}";
+                    }
+                    else
+                        nameCount[name] = 1;
                 }
                 else
                 {

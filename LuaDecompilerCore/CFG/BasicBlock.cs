@@ -59,6 +59,11 @@ namespace LuaDecompilerCore.CFG
         public List<uint> DominatesImmediate = new();
 
         /// <summary>
+        /// All globals referenced in this block or any of its inferiors. Prevents renaming to a used global name
+        /// </summary>
+        public HashSet<string> GlobalsReferenced = new();
+
+        /// <summary>
         /// Register IDs of registers killed (i.e. redefined) under the scope of this block (excluding this block)
         /// </summary>
         public HashSet<uint> ScopeKilled = new();
@@ -467,6 +472,21 @@ namespace LuaDecompilerCore.CFG
             }
 
             return false;
+        }
+
+        public void AddGlobalsReferences(ISet<string> globals, Function func) 
+        {
+            GlobalsReferenced.UnionWith(globals);
+
+            foreach (var blockIndex in DominantBlocks)
+            {
+                func.BlockList[(int)blockIndex].GlobalsReferenced.UnionWith(globals);
+            }
+
+            if (func.ParentBlockDefinition != null)
+            {
+                func.ParentBlockDefinition.AddGlobalsReferences(globals, func.Parent);
+            }
         }
 
         public bool IsCodeGenerated => _isCodeGenerated;

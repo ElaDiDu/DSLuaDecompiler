@@ -14,7 +14,6 @@ using LuaDecompilerCore.IR;
 
 namespace LuaDecompilerCore.Passes;
 
-//TODO Handle upvalues with same name as lower value
 /// <summary>
 /// Rename variables from generic names to usage context based names
 /// </summary>
@@ -82,6 +81,22 @@ public class RenameVariablesWithContextPass : IPass
                     }
                 }
             }
+        }
+
+        // Store global names
+        foreach (var block in f.BlockList)
+        {
+            HashSet<string> blockGlobals = new();
+            foreach (var instruction in block.Instructions)
+            {
+                foreach (var exp in instruction.GetExpressions())
+                {
+                    if (exp is IdentifierReference idRef && idRef.Identifier.IsGlobal)
+                        blockGlobals.Add(f.Constants[idRef.Identifier.ConstantId].StringValue);
+                }
+            }
+
+            block.AddGlobalsReferences(blockGlobals, f);
         }
 
         return false;
