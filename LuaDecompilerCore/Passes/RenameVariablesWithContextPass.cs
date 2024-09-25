@@ -33,6 +33,7 @@ public class RenameVariablesWithContextPass : IPass
         {
             foreach (var instruction in block.Instructions)
             {
+                FunctionCall? assigningCall = null;
                 if (instruction is Assignment assignment)
                 {
                     var right = assignment.Right;
@@ -43,6 +44,7 @@ public class RenameVariablesWithContextPass : IPass
                     if (right is FunctionCall fCall)
                     {
                         RenameVariablesInFunctionCall(f, block, fCall, assignment);
+                        assigningCall = fCall;
                     }
                     // Goal.Activate = function(...)...
                     // function TuskRider500000_Act45(...)...
@@ -70,16 +72,16 @@ public class RenameVariablesWithContextPass : IPass
                             SetFunctionArgNames(closure.Function, args);
                     }
                 }
-                else
+                
+                foreach (var expression in instruction.GetExpressions())
                 {
-                    foreach (var expression in instruction.GetExpressions())
+                    // Don't rename same function call twice
+                    if (expression is FunctionCall fCall && fCall != assigningCall)
                     {
-                        if (expression is FunctionCall fCall)
-                        {
-                            RenameVariablesInFunctionCall(f, block, fCall);
-                        }
+                        RenameVariablesInFunctionCall(f, block, fCall);
                     }
                 }
+                
             }
         }
 
