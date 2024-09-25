@@ -54,7 +54,7 @@ namespace DSLuaDecompiler
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             // Core options
-            var fileArgument = new Argument<string>("file", "The path to the Lua file to decompile.");
+            var filesArgument = new Argument<string[]>("files", "The paths to the Lua files to decompile.");
             var outputOption = new Option<string?>("--output", "The path to write the decompiled output.");
             outputOption.AddAlias("-o");
             var consoleOption = new Option<bool>("--console", "Print output to console instead of file");
@@ -92,7 +92,7 @@ namespace DSLuaDecompiler
             
             var rootCommand = new RootCommand("Dark Souls Lua Decompiler")
             {
-                fileArgument, 
+                filesArgument, 
                 outputOption, 
                 consoleOption, 
                 includedFunctionIdsOption, 
@@ -101,74 +101,77 @@ namespace DSLuaDecompiler
                 dumpDotGraphPassesOption,
                 insertDebugComments
             };
-            rootCommand.SetHandler((file, output, console, decompilationOptions) =>
+            rootCommand.SetHandler((files, output, console, decompilationOptions) =>
             {
                 var decompiler = new LuaDecompiler(decompilationOptions);
-                
-                Encoding outEncoding = Encoding.UTF8;
-                Console.OutputEncoding = outEncoding;
-                using var stream = File.OpenRead(file);
-                var br = new BinaryReaderEx(false, stream);
-                var lua = new LuaFile(br);
-                var main = new Function(lua.MainFunction.FunctionId);
-                DecompilationResult result;
-                switch (lua.Version)
-                {
-                    case LuaFile.LuaVersion.Lua50:
-                        result = decompiler.DecompileLuaFunction(new Lua50Decompiler(), main, lua.MainFunction);
-                        outEncoding = Encoding.GetEncoding("shift_jis");
-                        break;
-                    case LuaFile.LuaVersion.Lua51Hks:
-                        result = decompiler.DecompileLuaFunction(new HksDecompiler(), main, lua.MainFunction);
-                        outEncoding = Encoding.UTF8;
-                        break;
-                    case LuaFile.LuaVersion.Lua53Smash:
-                        result = decompiler.DecompileLuaFunction(new Lua53Decompiler(), main, lua.MainFunction);
-                        outEncoding = Encoding.UTF8;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
 
-                var toWrite = result.DecompiledSource;
-                var outputFile = output ?? Path.GetFileNameWithoutExtension(file) + ".dec.lua";
-                if (!console)
+                foreach (var file in files)
                 {
-                    File.WriteAllText(outputFile, toWrite, outEncoding);
-                    if (output != null)
+                    Encoding outEncoding = Encoding.UTF8;
+                    Console.OutputEncoding = outEncoding;
+                    using var stream = File.OpenRead(file);
+                    var br = new BinaryReaderEx(false, stream);
+                    var lua = new LuaFile(br);
+                    var main = new Function(lua.MainFunction.FunctionId);
+                    DecompilationResult result;
+                    switch (lua.Version)
                     {
-                        var outputBase = Path.GetDirectoryName(output) + @"\" + Path.GetFileNameWithoutExtension(output);
-                        if (result.IrResults.Length > 0)
+                        case LuaFile.LuaVersion.Lua50:
+                            result = decompiler.DecompileLuaFunction(new Lua50Decompiler(), main, lua.MainFunction);
+                            outEncoding = Encoding.GetEncoding("shift_jis");
+                            break;
+                        case LuaFile.LuaVersion.Lua51Hks:
+                            result = decompiler.DecompileLuaFunction(new HksDecompiler(), main, lua.MainFunction);
+                            outEncoding = Encoding.UTF8;
+                            break;
+                        case LuaFile.LuaVersion.Lua53Smash:
+                            result = decompiler.DecompileLuaFunction(new Lua53Decompiler(), main, lua.MainFunction);
+                            outEncoding = Encoding.UTF8;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    var toWrite = result.DecompiledSource;
+                    var outputFile = output ?? Path.GetFileNameWithoutExtension(file) + ".dec.lua";
+                    if (!console)
+                    {
+                        File.WriteAllText(outputFile, toWrite, outEncoding);
+                        if (output != null)
                         {
-                            var passBuilder = new StringBuilder(1024 * 512 * result.IrResults.Length);
-                            foreach (var pass in result.IrResults)
+                            var outputBase = Path.GetDirectoryName(output) + @"\" + Path.GetFileNameWithoutExtension(output);
+                            if (result.IrResults.Length > 0)
                             {
-                                passBuilder.Append($"-- Begin pass {pass.Pass} --\n");
-                                passBuilder.Append(pass.Ir);
-                                passBuilder.Append($"-- End pass {pass.Pass} --\n");
-                            }
-                            File.WriteAllText(outputBase + ".passes.lua", passBuilder.ToString(), outEncoding);
-                        }
-                        
-                        if (result.DotGraphResults.Length > 0)
-                        {
-                            foreach (var pass in result.DotGraphResults)
-                            {
-                                foreach (var f in pass.FunctionResults)
+                                var passBuilder = new StringBuilder(1024 * 512 * result.IrResults.Length);
+                                foreach (var pass in result.IrResults)
                                 {
-                                    File.WriteAllText(
-                                        $@"{outputBase}.{pass.Pass.Replace('-', '_')}.{f.FunctionId}.dot", 
-                                        f.DotGraph);
+                                    passBuilder.Append($"-- Begin pass {pass.Pass} --\n");
+                                    passBuilder.Append(pass.Ir);
+                                    passBuilder.Append($"-- End pass {pass.Pass} --\n");
+                                }
+                                File.WriteAllText(outputBase + ".passes.lua", passBuilder.ToString(), outEncoding);
+                            }
+
+                            if (result.DotGraphResults.Length > 0)
+                            {
+                                foreach (var pass in result.DotGraphResults)
+                                {
+                                    foreach (var f in pass.FunctionResults)
+                                    {
+                                        File.WriteAllText(
+                                            $@"{outputBase}.{pass.Pass.Replace('-', '_')}.{f.FunctionId}.dot",
+                                            f.DotGraph);
+                                    }
                                 }
                             }
                         }
                     }
+                    else
+                    {
+                        Console.WriteLine(toWrite);
+                    }
                 }
-                else
-                {
-                    Console.WriteLine(toWrite);
-                }
-            }, fileArgument, 
+            }, filesArgument, 
                 outputOption, 
                 consoleOption, 
                 new DecompilationOptionsBinder(includedFunctionIdsOption, 
@@ -177,7 +180,9 @@ namespace DSLuaDecompiler
                     dumpDotGraphPassesOption,
                     insertDebugComments));
 
-            return rootCommand.Invoke(args);
+            int result = rootCommand.Invoke(args);
+            Console.ReadKey();
+            return result;
         }
     }
 }
