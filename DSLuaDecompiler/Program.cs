@@ -180,9 +180,7 @@ namespace DSLuaDecompiler
                     dumpDotGraphPassesOption,
                     insertDebugComments));
 
-            int result = rootCommand.Invoke(args);
-            Console.ReadKey();
-            return result;
+            return rootCommand.Invoke(args);
         }
     }
 }
