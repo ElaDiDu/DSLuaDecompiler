@@ -75,7 +75,7 @@ public class RenameVariablesWithContextPass : IPass
                 
                 foreach (var expression in instruction.GetExpressions())
                 {
-                    // Don't rename same function call twice
+                    // Assigning call is already handled
                     if (expression is FunctionCall fCall && fCall != assigningCall)
                     {
                         RenameVariablesInFunctionCall(f, block, fCall);

@@ -27,6 +27,7 @@ namespace LuaDecompilerCore.Passes
             HandleRepeatNames(mainFunc, mainFunc.BeginBlock, new Dictionary<string, int>(), true);
         }
 
+        //TODO Ugly code duplicates
         private static void HandleRepeatNames(Function func, BasicBlock block, Dictionary<string, int> nameCount, bool newFunc)
         {
             if (newFunc)
@@ -40,18 +41,21 @@ namespace LuaDecompilerCore.Passes
                     if (!nameCount.ContainsKey(name))
                     {
                         // Make sure no locals are named after existing globals
-                        if (block.GlobalsReferenced.Contains(name))
+                        int countSuffix = FindNearestNonGlobalSuffix(block, name, 1);
+                        nameCount[name] = countSuffix;
+
+                        // First name has no suffix
+                        if (countSuffix > 1) 
                         {
-                            nameCount[name] = 2;
-                            block.IdentifierNames[id] = $"{name}_{nameCount[name]}";
+                            func.ParameterNames[id] = $"{name}_{countSuffix}";
                         }
-                        else
-                            nameCount[name] = 1;
                     }
                     else
                     {
-                        nameCount[name]++;
-                        func.ParameterNames[id] = $"{name}_{nameCount[name]}";
+                        // Make sure no locals are named after existing globals
+                        int countSuffix = FindNearestNonGlobalSuffix(block, name, nameCount[name] + 1);
+                        nameCount[name] = countSuffix;
+                        func.ParameterNames[id] = $"{name}_{countSuffix}";
                     }
                 }
             }
@@ -64,18 +68,21 @@ namespace LuaDecompilerCore.Passes
                 if (!nameCount.ContainsKey(name))
                 {
                     // Make sure no locals are named after existing globals
-                    if (block.GlobalsReferenced.Contains(name))
+                    int countSuffix = FindNearestNonGlobalSuffix(block, name, 1);
+                    nameCount[name] = countSuffix;
+
+                    // First name has no suffix
+                    if (countSuffix > 1)
                     {
-                        nameCount[name] = 2;
-                        block.IdentifierNames[id] = $"{name}_{nameCount[name]}";
+                        block.IdentifierNames[id] = $"{name}_{countSuffix}";
                     }
-                    else
-                        nameCount[name] = 1;
                 }
                 else
                 {
-                    nameCount[name]++;
-                    block.IdentifierNames[id] = $"{name}_{nameCount[name]}";
+                    // Make sure no locals are named after existing globals
+                    int countSuffix = FindNearestNonGlobalSuffix(block, name, nameCount[name] + 1);
+                    nameCount[name] = countSuffix;
+                    block.IdentifierNames[id] = $"{name}_{countSuffix}";
                 }
             }
 
@@ -89,6 +96,26 @@ namespace LuaDecompilerCore.Passes
                 if (child.ParentBlockDefinition == block)
                     HandleRepeatNames(child, child.BeginBlock, new Dictionary<string, int>(nameCount), true);
             }
+        }
+
+        /// <summary>
+        /// Return the suffix to a variable name to avoid global collisions in scope.
+        /// Testing the name from the given count up until you reach a name not in the globals.
+        /// </summary>
+        /// <param name="block"></param>
+        /// <param name="name"></param>
+        /// <param name="count">count of identifiers with this name</param>
+        /// <returns></returns>
+        private static int FindNearestNonGlobalSuffix(BasicBlock block, string name, int count)
+        {
+            var correctedName = name;
+            while (block.GlobalsReferenced.Contains(correctedName))
+            {
+                count++;
+                correctedName = $"{name}_{count}";
+            }
+
+            return count;
         }
     }
 }
