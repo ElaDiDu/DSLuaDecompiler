@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Binding;
 using System.CommandLine.Parsing;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using LuaDecompilerCore;
@@ -180,7 +181,16 @@ namespace DSLuaDecompiler
                     dumpDotGraphPassesOption,
                     insertDebugComments));
 
-            return rootCommand.Invoke(args);
+            int result = rootCommand.Invoke(args);
+
+            // Error, let user read it
+            if (result != 0)
+            {
+                Console.WriteLine("Press enter to exit.");
+                Console.ReadLine();
+            }
+            
+            return result;
         }
     }
 }
