@@ -284,7 +284,7 @@ public partial class FunctionPrinter
             }
 
             NewLine();
-            _indentLevel += 1;
+            PushIndent();
         }
 
         // Print warnings
@@ -341,11 +341,7 @@ public partial class FunctionPrinter
                     ((b.Last is ConditionalJump && b.EdgeTrue.BlockId != b.BlockId + 1) ||
                      (b.Last is not IJump and not Return && b.EdgeTrue.BlockId != b.BlockId + 1)))
                 {
-                    for (var i = 0; i < _indentLevel; i++)
-                    {
-                        Append("    ");
-                    }
-
+                    Indent();
                     Append("(goto ");
                     Append(b.EdgeTrue.Name);
                     Append(')');
@@ -355,11 +351,8 @@ public partial class FunctionPrinter
         }
         if (function.FunctionId != 0)
         {
-            _indentLevel -= 1;
-            for (var i = 0; i < _indentLevel; i++)
-            {
-                Append("    ");
-            }
+            PopIndent();
+            Indent();
             Append("end");
         }
 
@@ -394,7 +387,6 @@ public partial class FunctionPrinter
                 // Insert new lines before and after anything with a closure
                 NewLine();
             }
-            Indent();
 
             // Returns that don't appear at the end of the block need to be wrapped with a do..end scope to compile
             // correctly
@@ -402,20 +394,27 @@ public partial class FunctionPrinter
                 !(j == basicBlock.Instructions.Count - 1 ||
                  (basicBlock.Last is Return { IsImplicit: true } && j == basicBlock.Instructions.Count - 2)))
             {
+                Indent();
                 VisitReturn(r, true);
             }
             else if (inst is Break &&
                 !(j == basicBlock.Instructions.Count - 1 ||
                   (basicBlock.Last is Return { IsImplicit: true } && j == basicBlock.Instructions.Count - 2)))
             {
+                Indent();
                 VisitBreak(true);
             }
             else
             {
+                // End of function, don't indent function's "end" line
+                if (inst is not Return { IsImplicit: true })
+                {
+                    Indent();
+                }
                 VisitInstruction(inst);
             }
 
-            if (inst is not IfStatement)
+            if (inst is not IfStatement && inst is not Return { IsImplicit: true })
             {
                 NewLine();
             }
