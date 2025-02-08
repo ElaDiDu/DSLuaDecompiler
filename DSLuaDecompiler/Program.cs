@@ -1,7 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Binding;
 using System.CommandLine.Parsing;
-using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using LuaDecompilerCore;
@@ -189,7 +188,7 @@ namespace DSLuaDecompiler
                 Console.WriteLine("Press enter to exit.");
                 Console.ReadLine();
             }
-            
+
             return result;
         }
     }
