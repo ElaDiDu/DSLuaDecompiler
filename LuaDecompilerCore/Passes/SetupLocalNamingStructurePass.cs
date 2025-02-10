@@ -16,7 +16,11 @@ namespace LuaDecompilerCore.Passes
     {
         public bool RunOnFunction(DecompilationContext decompilationContext, FunctionContext functionContext, Function f)
         {
+            // TODO DOMINANCE GOTTEN BY GetAnalysis<DominanceAnalyzer> is sometimes incorrect, cached at a previous stage after which blocks move? only seen it once in conditionals.lua
+            functionContext.InvalidateAnalysis<DominanceAnalyzer>();
             var dominance = functionContext.GetAnalysis<DominanceAnalyzer>();
+            
+            //var dominance = functionContext.GetAnalysis<DominanceAnalyzer>();
             foreach (var block in f.BlockList) 
             {
                 block.DominantBlocks.AddRange(dominance.Dominance(block.BlockIndex).ToArray());

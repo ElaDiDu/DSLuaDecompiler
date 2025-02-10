@@ -415,7 +415,7 @@ namespace LuaDecompilerCore.CFG
             {
                 // Search dominant blocks
                 foreach (var blockIndex in DominantBlocks) 
-                {    
+                {
                     var name = func.BlockList[(int)blockIndex].IdentifierNames.TryGetValue(identifier, out var n) ? n : null;
                     if (name != null) 
                         return name;
