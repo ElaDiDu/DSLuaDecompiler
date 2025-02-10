@@ -77,6 +77,8 @@ public sealed class DecompilationTester
         _decompiler = new LuaDecompiler(decompilationOptions);
         _encoding = encoding;
         _multiThread = options.MultiThreaded;
+
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
     /// <summary>
