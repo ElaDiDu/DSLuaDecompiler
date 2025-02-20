@@ -105,3 +105,17 @@ function break10()
         b(i)
     end
 end
+
+function break11()
+    for i = 1, 10 do
+        a()
+        break
+    end
+end
+
+function break12()
+    for k, v in pairs(tbl) do
+        a()
+        break
+    end
+end

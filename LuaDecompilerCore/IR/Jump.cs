@@ -8,10 +8,13 @@ namespace LuaDecompilerCore.IR
     public abstract class ConditionalJumpBase : Instruction
     {
         public Expression Condition { get; set; }
+
+        public bool IsForLoopJump { get; }
         
-        protected ConditionalJumpBase(Expression condition)
+        protected ConditionalJumpBase(Expression condition, bool forLoopJump)
         {
             Condition = condition;
+            IsForLoopJump = forLoopJump;
         }
         
         public override void Parenthesize()
@@ -147,8 +150,9 @@ namespace LuaDecompilerCore.IR
             Label destination, 
             Expression condition, 
             Assignment? postTakenAssignment = null,
-            Interval killedLocals = default) : 
-            base(condition)
+            Interval killedLocals = default,
+            bool forLoopJump = false) : 
+            base(condition, forLoopJump)
         {
             Destination = destination;
             PostTakenAssignment = postTakenAssignment;
@@ -178,9 +182,9 @@ namespace LuaDecompilerCore.IR
         /// The destination block for the jump. Typically used for printing.
         /// </summary>
         public BasicBlock Destination { get; set; }
-        
-        public ConditionalJump(BasicBlock destination, Expression condition) : 
-            base(condition)
+
+        public ConditionalJump(BasicBlock destination, Expression condition, bool forLoopJump = false) : 
+            base(condition, forLoopJump)
         {
             Destination = destination;
         }

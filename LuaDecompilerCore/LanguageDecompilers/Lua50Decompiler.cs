@@ -677,7 +677,7 @@ public class Lua50Decompiler : ILanguageDecompiler
                         new BinOp(new IdentifierReference(irFunction.GetRegister(a)),
                             new IdentifierReference(
                                 irFunction.GetRegister(a + 1)), BinOp.OperationType.OpLoopCompare), 
-                        null, new Interval((int)a, (int)a + 3)));
+                        null, new Interval((int)a, (int)a + 3), true));
                     break;
                 case Lua50Ops.OpTForLoop:
                     args = new List<Expression>();
@@ -706,7 +706,7 @@ public class Lua50Decompiler : ILanguageDecompiler
                     instructions.Add(new ConditionalJumpLabel(irFunction.GetLabel((uint)(i / 4 + 2)),
                         new BinOp(Register(irFunction, a + 2),
                             new Constant(Constant.ConstantType.ConstNil, -1), BinOp.OperationType.OpNotEqual),
-                        null, new Interval((int)a, (int)a + (int)c + 3)));
+                        null, new Interval((int)a, (int)a + (int)c + 3), true));
                     break;
                 case Lua50Ops.OpTForPRep:
                     instructions.Add(new JumpLabel(irFunction.GetLabel((uint)(i / 4 + sbx + 1))));

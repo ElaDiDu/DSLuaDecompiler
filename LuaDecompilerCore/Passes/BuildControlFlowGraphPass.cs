@@ -134,7 +134,7 @@ public class BuildControlFlowGraphPass : IPass
                 b.Last = jmp switch
                 {
                     JumpLabel => new Jump(destination),
-                    ConditionalJumpLabel j => new ConditionalJump(destination, j.Condition),
+                    ConditionalJumpLabel j => new ConditionalJump(destination, j.Condition, j.IsForLoopJump),
                     _ => throw new Exception()
                 };
                 b.Last.DefinedRegisters = jmpInstruction.DefinedRegisters;
@@ -173,8 +173,31 @@ public class BuildControlFlowGraphPass : IPass
                 }
             }
         }
+
+        // Fourth pass: If loop body ends in break, the unconditional jump to the loop follow hides what was a a loop.
+        // Add the head as a successor to the body to create a loop in the CFG.
+        // Logically there is no loop (instant break), but this is needed for the right bytecode.
+        for (var b = 0; b < f.BlockList.Count; b++)
+        {
+            // Begin block has no predecessors but shouldn't be removed because :)
+            if (f.BlockList[b] == f.BeginBlock)
+            {
+                continue;
+            }
+
+            var current = f.BlockList[b];
+            var previous = f.BlockList[b - 1];
+            if (current.Instructions.Count > 0 && current.Last is ConditionalJump { IsForLoopJump: true } forJump)
+            {
+                // Loop test isn't a successor to end of loop body, add it as a successor anyways.
+                if (!previous.Successors.Contains(current) && previous.Last is Jump j)
+                {
+                    previous.AddSuccessor(current);
+                }
+            }
+        }
         
-        // Forth pass: Remove unreachable blocks that can't be resolved
+        // Fifth pass: Remove unreachable blocks that can't be resolved
         for (var b = 0; b < f.BlockList.Count; b++)
         {
             // Begin block has no predecessors but shouldn't be removed because :)

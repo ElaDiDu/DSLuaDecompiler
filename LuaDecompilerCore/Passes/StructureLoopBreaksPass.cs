@@ -38,11 +38,11 @@ public class StructureLoopBreaksPass : IPass
             // Due to Lua compiler optimizations the loop follow might jump to another block and breaks will go to that
             // block instead. We need to take those targets into account too.
             var followTarget = loopHead.LoopFollow.PeepholeSuccessor();
-            
+
             // An unconditional jump to the loop follow can be replaced with a break and rewriting the CFG to fall
             // through to the next block
-            if (b.Successors.Count == 1 && b.Instructions.Count > 0 && b.Last is Jump j &&
-                (b.Successors[0] == loopHead.LoopFollow || b.Successors[0] == followTarget))
+            if (b.Instructions.Count > 0 && b.Last is Jump j &&
+                (j.Destination == loopHead.LoopFollow || j.Destination == followTarget))
             {
                 b.Last = new Break();
                 b.Last.Absorb(j);
